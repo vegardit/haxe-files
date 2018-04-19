@@ -1,0 +1,8 @@
+-cp src
+-cp test
+-main hx.files.TestRunner
+-lib haxe-doctest
+-dce full
+-debug
+-swf-version 11.5
+-D net-ver=45

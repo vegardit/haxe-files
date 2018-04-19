@@ -1,0 +1,54 @@
+sudo: required
+dist: trusty
+
+language: haxe
+
+os:
+  - linux
+  - osx
+
+haxe:
+  - "3.4.7"
+  - development
+
+env:
+  - HAXE_TARGET=cpp
+  - HAXE_TARGET=cs
+  - HAXE_TARGET=flash
+  - HAXE_TARGET=lua
+  - HAXE_TARGET=neko
+  - HAXE_TARGET=node
+  - HAXE_TARGET=php
+  - HAXE_TARGET=php7
+  - HAXE_TARGET=python
+  - HAXE_TARGET=java
+  - HAXE_TARGET="js -lib phantomjs"
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - haxe: development
+    - env: HAXE_TARGET=cs  # C# fails because of https://github.com/HaxeFoundation/haxe/issues/6533
+    - env: HAXE_TARGET=lua # Lua fails because of https://github.com/HaxeFoundation/haxe/issues/6946
+    - env: HAXE_TARGET="js -lib phantomjs" # results in "ReferenceError: Can't find variable: require" when executed via travis for unknown reason
+    - os: osx
+  exclude:
+    - env: HAXE_TARGET=flash
+    - haxe: development
+      os: osx
+
+install:
+  #- haxelib git tink_io https://github.com/haxetink/tink_io pure
+  #- haxelib git tink_cli https://github.com/haxetink/tink_cli pure
+  #- haxelib git travix https://github.com/back2dos/travix && pushd . && cd $(haxelib config)travix/git && haxe build-neko.hxml && popd
+  #- haxelib run travix install
+  - haxelib dev haxe-files .
+  - haxelib install haxe-doctest
+  - haxelib install haxe-strings
+  - haxelib install haxe-concurrent
+  - haxelib install phantomjs
+  - haxelib install travix
+
+
+script:
+  - haxelib run travix $HAXE_TARGET

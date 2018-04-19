@@ -1,0 +1,17 @@
+{
+    "name": "haxe-files",
+    "url": "https://github.com/vegardit/haxe-files",
+    "license": "Apache",
+    "classPath": "src/",
+    "tags": [ "files","general","utils","helpers","vegardit","cross","cs","java","lua","neko","nodejs","phantomjs","php","python"],
+    "description": "A haxelib for consistent cross-platform filesystem operations and proper Windows-/Unix-style path handling.",
+    "contributors": [
+        "vegardit"
+    ],
+    "releasenote": "See https://github.com/vegardit/haxe-files/blob/master/CHANGELOG.md",
+    "version": "1.0.0",
+    "dependencies": {
+        "haxe-concurrent": "",
+        "haxe-strings": ""
+    }
+}
