@@ -3,7 +3,7 @@
     "url": "https://github.com/vegardit/haxe-files",
     "license": "Apache",
     "classPath": "src/",
-    "tags": [ "files","general","utils","helpers","vegardit","cross","cs","java","lua","neko","nodejs","phantomjs","php","python"],
+    "tags": [ "file","files","filesystem","vegardit","cross","cs","hashlink","java","lua","neko","nodejs","phantomjs","php","php7","python"],
     "description": "A haxelib for consistent cross-platform filesystem operations and proper Windows-/Unix-style path handling.",
     "contributors": [
         "vegardit"
