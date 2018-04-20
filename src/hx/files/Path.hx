@@ -163,7 +163,7 @@ class Path {
      * </code></pre>
      */
     public var isAbsolute(get, never):Bool;
-    function get_isAbsolute():Bool
+    inline function get_isAbsolute():Bool
         return root != null;
 
 
@@ -171,6 +171,19 @@ class Path {
      * Indicates if this object represents a path compatible with the local operating/file system.
      */
     public var isLocal(default, null):Bool;
+
+
+    /**
+     * <pre><code>
+     * >>> Path.win("C:\\foo").isRoot         == false
+     * >>> Path.win("C:\\foo").parent.isRoot  == true
+     * >>> Path.unix("/foo"   ).isRoot        == true
+     * >>> Path.unix("/foo"   ).parent.isRoot == false
+     * </code></pre>
+     */
+    public var isRoot(get, never):Bool;
+    inline function get_isRoot():Bool
+        return isAbsolute && parent == null;
 
 
     /**
