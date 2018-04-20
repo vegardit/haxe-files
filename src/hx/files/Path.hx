@@ -177,8 +177,8 @@ class Path {
      * <pre><code>
      * >>> Path.win("C:\\foo").isRoot         == false
      * >>> Path.win("C:\\foo").parent.isRoot  == true
-     * >>> Path.unix("/foo"   ).isRoot        == true
-     * >>> Path.unix("/foo"   ).parent.isRoot == false
+     * >>> Path.unix("/foo"   ).isRoot        == false
+     * >>> Path.unix("/foo"   ).parent.isRoot == true
      * </code></pre>
      */
     public var isRoot(get, never):Bool;
