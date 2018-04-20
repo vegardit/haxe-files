@@ -103,7 +103,7 @@ class Dir {
             }
 
             for (_p in parts) {
-                if (!_p.exists() && !LFileSystem.mkdir(_p.toString(), 511 ).result)
+                if (!_p.exists() && !lua.lib.luv.fs.FileSystem.mkdir(_p.toString(), 511 ).result)
                         throw 'Could not create directory: $_p';
             }
             return true;
