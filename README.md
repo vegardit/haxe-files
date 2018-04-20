@@ -20,7 +20,7 @@ A [haxelib](http://lib.haxe.org/documentation/using-haxelib/) for consistent cro
 
 All classes are located in the package `hx.files` or below.,
 
-The library has been extensively unit tested (over 490 individual test cases) on the targets C++, C#, HashLink, Java, JavaScript (Node.js and PhantomJS),
+The library has been extensively unit tested (over 500 individual test cases) on the targets C++, C#, HashLink, Java, JavaScript (Node.js and PhantomJS),
 Neko, PHP 5, PHP 7 and Python 3.
 
 Requires Haxe 3.4 or higher.
