@@ -92,7 +92,22 @@ class Dir {
         if (path.exists())
             return false;
 
-        #if (sys || macro || nodejs)
+        #if lua
+            // workaround for https://github.com/HaxeFoundation/haxe/issues/6946
+            var parts = [ path ];
+            var _p = path;
+            while ((_p = _p.parent) != null) {
+                if (_p.isRoot)
+                    break;
+                parts.insert(0, _p);
+            }
+
+            for (_p in parts) {
+                if (!_p.exists() && !LFileSystem.mkdir(_p.toString(), 511 ).result)
+                        throw 'Could not create directory: $_p';
+            }
+            return true;
+        #elseif (sys || macro || nodejs)
             FileSystem.createDirectory(path.toString());
             return true;
         #elseif js
