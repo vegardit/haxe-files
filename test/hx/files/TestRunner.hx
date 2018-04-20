@@ -57,10 +57,10 @@ class TestRunner extends DocTestRunner {
 
         fw.watch(file.path);
 
-        _later(  50, function() file.writeString("123"));
-        _later( 400, function() file.appendString("456"));
-        _later(1800, function() file.writeString("12345_")); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
-        _later(2000, function() file.delete());
+        _later(  50, function() { file.writeString("123");    trace("-> create: "  + file ); });
+        _later( 400, function() { file.appendString("456");   trace("-> append: "  + file ); });
+        _later(1800, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
+        _later(2000, function() { file.delete();              trace("-> delete: "  + file ); });
         _later(2200, function() {
             fw.stop();
             ex.stop();
@@ -96,10 +96,11 @@ class TestRunner extends DocTestRunner {
             dir.create();
             subdir.create();
             file.writeString("123");
+            trace("-> create: "  + file );
         });
-        _later( 400, function() file.appendString("456"));
-        _later(1500, function() subdir.delete(true));
-        _later(1800, function() dir.delete(true));
+        _later( 400, function() { file.appendString("456"); trace("-> append: "  + file  ); });
+        _later(1500, function() { subdir.delete(true);      trace("-> delete: "  + subdir); });
+        _later(1800, function() { dir.delete(true);         trace("-> delete: "  + dir   ); });
         _later(2000, function() {
             fw.stop();
             ex.stop();
@@ -113,7 +114,7 @@ class TestRunner extends DocTestRunner {
     function _later(delayMS:Int, fn:Void->Void) {
         _asyncTests++;
         var future:TaskFuture<Dynamic> = _asyncExecutor.submit(function() {
-            fn();
+            try fn() catch (ex:Dynamic) trace(ex);
             _asyncTests--;
         }, ONCE(delayMS));
     }
