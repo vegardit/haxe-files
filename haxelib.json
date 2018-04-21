@@ -4,7 +4,7 @@
     "license": "Apache",
     "classPath": "src/",
     "tags": [ "file","files","filesystem","vegardit","cross","cs","hashlink","java","lua","neko","nodejs","phantomjs","php","php7","python"],
-    "description": "A haxelib for consistent cross-platform filesystem operations and proper Windows-/Unix-style path handling.",
+    "description": "A haxelib for consistent cross-platform filesystem operations and proper Windows-/Unix-style path handling. Supports wildcard file searches (globbing).",
     "contributors": [
         "vegardit"
     ],
