@@ -119,6 +119,96 @@ class Dir {
     }
 
 
+    /**
+     * Recursviely copies the given directory.
+     *
+     * <pre><code>
+     * >>> Dir.of("target/copyA/11").create()            throws nothing
+     * >>> File.of("target/copyA/11/test.txt").touch()   throws nothing
+     *
+     * >>> Dir.of("target/copyA").copyTo("target/copyB")              throws nothing
+     * >>> File.of("target/copyB/11/test.txt").path.exists()          == true
+     * >>> Dir.of("target/copyA").copyTo("target/copyB")              throws '[newPath] "target' + Path.of("").dirSep + 'copyB" already exists!'
+     * >>> Dir.of("target/copyA").copyTo("target/copyB", [OVERWRITE]) throws nothing
+     * >>> Dir.of("target/copyA").copyTo("target/copyB", [MERGE])     throws nothing
+     *
+     * >>> Dir.of("target/copyA").delete(true)           throws nothing
+     * >>> Dir.of("target/copyB").delete(true)           throws nothing
+     * </code></pre>
+     *
+     * @return a Dir instance pointing to the copy target
+     */
+    public function copyTo(newPath:Either2<String, Path>, ?options:Array<DirCopyOption>):Dir {
+        assertValidPath();
+
+        if (newPath == null)
+            throw "[newPath] must not be null or empty!";
+
+        var trimWhiteSpaces = true;
+        var overwrite = false;
+        var merge = false;
+        var onFile:File -> File -> Void = null;
+        var onDir:Dir -> Dir -> Void = null;
+
+        if (options != null) for (o in options) {
+            switch(o) {
+                case OVERWRITE: overwrite = true;
+                case MERGE: merge = true;
+                case NO_WHITESPACE_TRIMMING: trimWhiteSpaces = false;
+                case LISTENER(f, d): onFile = f; onDir = d;
+            }
+        }
+
+        var targetPath:Path = switch(newPath.value) {
+            case a(str): Path.of(str, trimWhiteSpaces);
+            case b(obj): obj;
+        }
+
+        if (targetPath.filename == "")
+            throw "[newPath] must not be null or empty!";
+
+        if (path.getAbsolutePath() == targetPath.getAbsolutePath())
+            return this;
+
+        var targetDir = targetPath.toDir();
+
+        if (targetPath.exists()) {
+            if (!overwrite && !merge)
+                throw '[newPath] "$targetPath" already exists!';
+
+            if (!targetPath.isDirectory())
+                throw '[newPath] "$targetPath" already exists and is not a directory!';
+
+            if(!merge)
+                targetDir.delete(true);
+        }
+
+        #if (sys || macro || nodejs)
+            var sourcPathLen = toString().length;
+            targetDir.create();
+            walk(
+                function(file) {
+                    var targetDirFile = targetDir.path.join(file.path.toString().substr(sourcPathLen)).toFile();
+                    file.copyTo(targetDirFile.path, merge ? [OVERWRITE] : null);
+                    if (onFile != null) onFile(file, targetDirFile);
+                },
+                function(dir) {
+                    var targetDirDir = targetDir.path.join(dir.path.toString().substr(sourcPathLen)).toDir();
+                    targetDirDir.create();
+                    if (onDir != null) onDir(dir, targetDirDir);
+                    return true;
+                }
+            );
+        #elseif phantomjs
+            js.phantomjs.FileSystem.copyTree(path.toString(), targetPath.toString());
+        #else
+            throw "Operation not supported on current target.";
+        #end
+
+        return targetDir;
+    }
+
+
     public function isEmpty() {
         assertValidPath(false);
 
@@ -343,16 +433,23 @@ class Dir {
      * >>> Dir.of("").moveTo("")                     throws "[path.filename] must not be null or empty!"
      * </code></pre>
      *
-     * @param overwrite if set to true any file or directory already existing at newPath will be deleted automatically
-     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
-     *
      * @return a Dir instance pointing to the new location
      */
-    public function moveTo(newPath:Either2<String, Path>, overwrite = false, trimWhiteSpaces = true):Dir {
+    public function moveTo(newPath:Either2<String, Path>, ?options:Array<DirMoveOption>):Dir {
         assertValidPath();
 
         if (newPath == null)
             throw "[newPath] must not be null or empty!";
+
+        var trimWhiteSpaces = true;
+        var overwrite = false;
+
+        if (options != null) for (o in options) {
+            switch(o) {
+                case OVERWRITE: overwrite = true;
+                case NO_WHITESPACE_TRIMMING: trimWhiteSpaces = false;
+            }
+        }
 
         var targetPath:Path = switch(newPath.value) {
             case a(str): Path.of(str, trimWhiteSpaces);
@@ -408,22 +505,29 @@ class Dir {
      * >>> Dir.of(""          ).renameTo("")           throws "[newDirName] must not be null or empty!"
      * </code></pre>
      *
-     * @param overwrite if set to true any file or directory already existing at newPath will be deleted automatically
      * @param newDirName the new directory name (NOT the full path!)
      *
      * @return a Dir instance pointing to the new location
      */
-    public function renameTo(newDirName:String, overwrite = false):Dir {
+    public function renameTo(newDirName:String, ?options:Array<DirRenameOption>):Dir {
         if (newDirName.isEmpty())
             throw "[newDirName] must not be null or empty!";
 
         if (newDirName.containsAny([Path.UnixPath.DIR_SEP, Path.WindowsPath.DIR_SEP]))
             throw '[newDirName] "$newDirName" must not contain directory separators!';
 
-        if (path.parent == null)
-            moveTo(newDirName, overwrite);
+        var opts:Array<DirMoveOption> = null;
 
-        return moveTo(path.parent.join(newDirName), overwrite);
+        if (options != null) for (o in options) {
+            switch(o) {
+                case OVERWRITE: opts = [OVERWRITE];
+            }
+        }
+
+        if (path.parent == null)
+            return moveTo(newDirName, opts);
+
+        return moveTo(path.parent.join(newDirName), opts);
     }
 
 
@@ -493,4 +597,43 @@ class Dir {
     public function toString():String {
         return path.toStringWithTrailingSeparator();
     }
+}
+
+
+enum DirRenameOption {
+    /**
+     * if a directory already existing at `newPath` it will be deleted automatically
+     */
+    OVERWRITE;
+}
+
+
+enum DirCopyOption {
+    /**
+     * If MERGE is not specified, delete the targt directory prio copying if it exists already.
+     * If MERGE is specified, overwrite existing files in the target directory otherwise skip the respective source files.
+     */
+    OVERWRITE;
+
+    MERGE;
+
+    /**
+     * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+     */
+    NO_WHITESPACE_TRIMMING;
+
+    LISTENER(onFile:File -> File -> Void, ?onDir:Dir -> Dir -> Void);
+}
+
+
+enum DirMoveOption {
+    /**
+     * if a directory already existing at `newPath` it will be deleted automatically
+     */
+    OVERWRITE;
+
+    /**
+     * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+     */
+    NO_WHITESPACE_TRIMMING;
 }
