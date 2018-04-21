@@ -219,6 +219,7 @@ class File {
      * >>> File.of("target/foo.txt").writeString("HEY!") throws nothing
      * >>> File.of("target/foo.txt").copyTo("target/bar.txt") throws nothing
      * >>> File.of("target/foo.txt").copyTo("target/bar.txt") throws '[newPath] "target' + Path.of("").dirSep + 'bar.txt" already exists!'
+     * >>> File.of("target/foo.txt").copyTo("target/bar.txt", [OVERWRITE]) throws nothing
      * >>> File.of("target/foo.txt").path.exists()            == true
      * >>> File.of("target/bar.txt").path.exists()            == true
      * >>> File.of("target/foo.txt").delete()                 == true
@@ -229,14 +230,23 @@ class File {
      * >>> File.of(""           ).copyTo("") throws "[path.filename] must not be null or empty!"
      * </code></pre>
      *
-     * @param overwrite if set to true any file already existing at newPath will be deleted automatically
-     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
+     * @return a File instance pointing to the copy target
      */
-    public function copyTo(newPath:Either2<String, Path>, overwrite = false, trimWhiteSpaces = true):File {
+    public function copyTo(newPath:Either2<String, Path>, ?options:Array<FileCopyOption>):File {
         assertValidPath();
 
         if (newPath == null)
             throw "[newPath] must not be null or empty!";
+
+        var trimWhiteSpaces = true;
+        var overwrite = false;
+
+        if (options != null) for (o in options) {
+            switch(o) {
+                case OVERWRITE: overwrite = true;
+                case NO_WHITESPACE_TRIMMING: trimWhiteSpaces = false;
+            }
+        }
 
         var targetPath:Path = switch(newPath.value) {
             case a(str): Path.of(str, trimWhiteSpaces);
@@ -288,16 +298,23 @@ class File {
      * >>> File.of(""              ).moveTo("") throws "[path.filename] must not be null or empty!"
      * </code></pre>
      *
-     * @param overwrite if set to true any file already existing at newPath will be deleted automatically
-     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
-     *
      * @return a File instance pointing to the new location
      */
-    public function moveTo(newPath:Either2<String, Path>, overwrite = false, trimWhiteSpaces = true):File {
+    public function moveTo(newPath:Either2<String, Path>, ?options:Array<FileMoveOption>):File {
         assertValidPath();
 
         if (newPath == null)
             throw "[newPath] must not be null or empty!";
+
+        var trimWhiteSpaces = true;
+        var overwrite = false;
+
+        if (options != null) for (o in options) {
+            switch(o) {
+                case OVERWRITE: overwrite = true;
+                case NO_WHITESPACE_TRIMMING: trimWhiteSpaces = false;
+            }
+        }
 
         var targetPath:Path = switch(newPath.value) {
             case a(str): Path.of(str, trimWhiteSpaces);
@@ -350,22 +367,29 @@ class File {
      * >>> File.of(""              ).renameTo("")               throws "[newFileName] must not be null or empty!"
      * </code></pre>
      *
-     * @param overwrite if set to true any file already existing at newPath will be deleted automatically
      * @param newDirName the new directory name (NOT the full path!)
      *
      * @return a File instance pointing to the new location
      */
-    public function renameTo(newFileName:String, overwrite = false):File {
+    public function renameTo(newFileName:String, ?options:Array<FileRenameOption>):File {
         if (newFileName.isEmpty())
             throw "[newFileName] must not be null or empty!";
 
         if (newFileName.containsAny([Path.UnixPath.DIR_SEP, Path.WindowsPath.DIR_SEP]))
             throw '[newFileName] "$newFileName" must not contain directory separators!';
 
-        if (path.parent == null)
-            moveTo(newFileName, overwrite);
+        var opts:Array<FileMoveOption> = null;
 
-        return moveTo(path.parent.join(newFileName), overwrite);
+        if (options != null) for (o in options) {
+            switch(o) {
+                case OVERWRITE: opts = [OVERWRITE];
+            }
+        }
+
+        if (path.parent == null)
+            return moveTo(newFileName, opts);
+
+        return moveTo(path.parent.join(newFileName), opts);
     }
 
 
@@ -484,4 +508,38 @@ enum FileWriteMode {
     UPDATE;
     #end
     APPEND;
+}
+
+
+enum FileRenameOption {
+    /**
+     * if a file already existing at `newPath` it will be deleted automatically
+     */
+    OVERWRITE;
+}
+
+
+enum FileCopyOption {
+    /**
+     * if a file already existing at `newPath` it will be deleted automatically
+     */
+    OVERWRITE;
+
+    /**
+     * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+     */
+    NO_WHITESPACE_TRIMMING;
+}
+
+
+enum FileMoveOption {
+    /**
+     * if a file already existing at `newPath` it will be deleted automatically
+     */
+    OVERWRITE;
+
+    /**
+     * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+     */
+    NO_WHITESPACE_TRIMMING;
 }
