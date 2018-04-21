@@ -259,9 +259,8 @@ class Path {
         #end
 
         #if lua
-            // sys.FileSystem.exists(path); on Lua does not work with directories
-            // https://github.com/HaxeFoundation/haxe/issues/6946
-            return sys.FileSystem.exists(path) ? true : lua.Os.rename(path, path).success == true;
+            // workaround for https://github.com/HaxeFoundation/haxe/issues/6946
+            return lua.lib.luv.fs.FileSystem.stat(path).result != null;
         #elseif (sys || macro || nodejs)
             return sys.FileSystem.exists(path);
         #elseif phantomjs
