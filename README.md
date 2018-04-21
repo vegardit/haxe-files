@@ -147,10 +147,13 @@ Implementations of the [hx.files.watcher.FileWatcher](https://github.com/vegardi
 interface allow you to monitor the file system for create/delete/change events.
 
 The [hx.files.watcher.PollingFileWatcher](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/watcher/PollingFileWatcher.hx) class
-scans the file system in intervalls to recursively determine file changes. This is a rather in-efficient way but works cross-target.
+scans the file system in intervalls to recursively determine file changes. This is a rather inefficient way but works cross-target.
 
-More efficient target-specific implementations can be provided in the future:
-* For Java based on [WatcherService](https://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html),
+With Java7 or higher the [hx.files.watcher.JavaFileWatcher](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/watcher/JavaFileWatcher.hx)
+based on [WatcherService](https://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html) is available.
+It is more efficient but has some limitations as documented in the source code.
+
+Other target-specific implementations can be provided in the future:
 * For C++ based on [fswatch](https://emcrisostomo.github.io/fswatch/)
 * For Python based on [watchdog](https://pypi.org/project/watchdog/)
 

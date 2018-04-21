@@ -46,30 +46,15 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
 
     override
-    public function start():Void {
-        _stateLock.execute(function() {
-            if (state == RUNNING) {
-                return;
-            }
-
-            if (state == STOPPING) {
-                throw '[$this] is currently stopping!';
-            }
-
-            scanTask = executor.submit(this.scanAll, Schedule.FIXED_DELAY(intervalMS, 0));
-        });
+    public function onStart():Void {
+        scanTask = executor.submit(this.scanAll, Schedule.FIXED_DELAY(intervalMS, 0));
     }
 
 
     override
-    public function stop():Void {
-        _stateLock.execute(function() {
-            if (state == RUNNING) {
-                scanTask.cancel();
-                scanTask = null;
-            }
-            state == STOPPED;
-        });
+    public function onStop():Void {
+        scanTask.cancel();
+        scanTask = null;
     }
 
 
@@ -86,12 +71,13 @@ class PollingFileWatcher extends AbstractFileWatcher {
         trace('Watching [$pathObj]...');
         watchedSync.execute(function() {
             var pathStr = pathObj.toString();
-            if (!watched.exists(pathStr)) {
-                if (scanTask == null)
-                    watched.set(pathStr, FSEntry.UNSCANNED(pathObj));
-                else
-                    scanPath(FSEntry.UNSCANNED(pathObj));
-            }
+            if (watched.exists(pathStr))
+                return;
+
+            if (scanTask == null)
+                watched.set(pathStr, FSEntry.UNSCANNED(pathObj));
+            else
+                scanPath(FSEntry.UNSCANNED(pathObj));
         });
     }
 
@@ -102,10 +88,15 @@ class PollingFileWatcher extends AbstractFileWatcher {
             return;
 
         watchedSync.execute(function() {
-            watched.remove((switch(path.value) {
-                case a(obj): obj;
-                case b(str): Path.of(str);
-            }).normalize().toString());
+            var pathStr = (
+                switch(path.value) {
+                    case a(obj): obj;
+                    case b(str): Path.of(str);
+                }
+            ).normalize().toString();
+
+            trace('Unwatching [$pathStr]...');
+            watched.remove(pathStr);
         });
     }
 

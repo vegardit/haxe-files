@@ -540,7 +540,7 @@ class Path {
             return untyped __cs__("global::System.IO.File.Exists(toString())");
         #elseif java
             return untyped __java__("new java.io.File(toString()).isFile()");
-        #elseif nodejs
+        #elseif (nodejs && !macro)
             return js.node.Fs.statSync(toString()).isFile();
         #elseif phantomjs
             return js.phantomjs.FileSystem.isFile(toString());

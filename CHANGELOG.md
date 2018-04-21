@@ -8,11 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 ## [Unreleased]
 
 ### Added
-- Path#isRoot
-- Dir#copyTo
+- hx.files.Path#isRoot
+- hx.files.Dir#copyTo
+- hx.files.watcher.JavaFileWatcher
 
 ### Changed
-- using Enum options for Dir#moveTo/#renameTo, File#copyTo/#moveTo/#renameTo
+- using Enum options for hx.files.Dir#moveTo/#renameTo, hx.files.File#copyTo/#moveTo/#renameTo
 
 ### Fixed
 - [lua] Dir.createDirectory() does not work recursively because of https://github.com/HaxeFoundation/haxe/issues/6946

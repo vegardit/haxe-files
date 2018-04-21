@@ -11,7 +11,7 @@ import hx.concurrent.lock.RLock;
 import hx.doctest.DocTestRunner;
 import hx.files.watcher.FileWatcher.FileSystemEvent;
 import hx.files.watcher.PollingFileWatcher;
-
+import hx.strings.internal.OS;
 
 /**
  * @author Sebastian Thomschke, Vegard IT GmbH
@@ -41,20 +41,76 @@ class TestRunner extends DocTestRunner {
     }
 
 
-    public function testFileWatcher_SingleFile():Void {
+    #if java
+    public function testJavaFileWatcher():Void {
         var ex = Executor.create();
+        var fw = new hx.files.watcher.JavaFileWatcher(ex);
 
-        var file = File.of("target/filewatcher_test.txt");
-        file.delete();
+        var events = new Array<FileSystemEvent>();
+        fw.subscribe(function (event) {
+            var path = switch(event) {
+                case DIR_CREATED(dir): dir.path;
+                case DIR_DELETED(dir): dir.path;
+                case DIR_MODIFIED(dir, _): dir.path;
+                case FILE_CREATED(file): file.path;
+                case FILE_DELETED(file): file.path;
+                case FILE_MODIFIED(file, _): file.path;
+            }
+            trace('EVENT: ${event.getName()}: $path');
+            events.push(event);
+        });
 
+        var dir = Dir.of("target/filewatcher_test");
+        dir.delete(true);
+        dir.create();
+
+        fw.watch(dir.path);
+
+        Sys.sleep(0.2); dir.path.join("foo").toDir().create();
+        Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().writeString("123");
+        Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().appendString("456");
+        Sys.sleep(0.2); dir.path.join("foo").toDir().delete(true);
+        Sys.sleep(0.2);
+
+        assertTrue(events.length > 3);
+
+        fw.unwatch(dir.path);
+
+        events = new Array<FileSystemEvent>();
+        Sys.sleep(0.2); dir.path.join("foo").toDir().create();
+        Sys.sleep(0.2); dir.path.join("test.txt").toFile().writeString("123");
+        Sys.sleep(0.2);
+
+        assertEquals(events.length, 0);
+
+        fw.stop();
+        ex.stop();
+
+        dir.delete(true);
+    }
+    #end
+
+
+    public function testPollingFileWatcher_SingleFile():Void {
+        var ex = Executor.create();
         var fw = new PollingFileWatcher(ex, 100);
 
         var events = new Array<FileSystemEvent>();
         fw.subscribe(function (event) {
-            trace('EVENT: ${event.getName()}');
+            var path = switch(event) {
+                case DIR_CREATED(dir): dir.path;
+                case DIR_DELETED(dir): dir.path;
+                case DIR_MODIFIED(dir, _): dir.path;
+                case FILE_CREATED(file): file.path;
+                case FILE_DELETED(file): file.path;
+                case FILE_MODIFIED(file, _): file.path;
+            }
+            trace('EVENT: ${event.getName()}: $path');
             events.push(event);
         });
 
+        var file = File.of("target/filewatcher_test.txt");
+        file.delete();
         fw.watch(file.path);
 
         _later(  50, function() { file.writeString("123");    trace("-> create: "  + file ); });
@@ -74,21 +130,28 @@ class TestRunner extends DocTestRunner {
     }
 
 
-    public function testFileWatcher_DirTree():Void {
+    public function testPollingFileWatcher_DirTree():Void {
         var ex = Executor.create();
+        var fw = new PollingFileWatcher(ex, 100);
+
+        var events = new Array<FileSystemEvent>();
+        fw.subscribe(function (event) {
+            var path = switch(event) {
+                case DIR_CREATED(dir): dir.path;
+                case DIR_DELETED(dir): dir.path;
+                case DIR_MODIFIED(dir, _): dir.path;
+                case FILE_CREATED(file): file.path;
+                case FILE_DELETED(file): file.path;
+                case FILE_MODIFIED(file, _): file.path;
+            }
+            trace('EVENT: ${event.getName()}: $path');
+            events.push(event);
+        });
 
         var dir = Dir.of("target/filewatcher_test");
         var subdir = dir.path.join("abc/def").toDir();
         var file = subdir.path.join("test.txt").toFile();
         dir.delete(true);
-
-        var fw = new PollingFileWatcher(ex, 100);
-
-        var events = new Array<FileSystemEvent>();
-        fw.subscribe(function (event) {
-            trace('EVENT: ${event.getName()}');
-            events.push(event);
-        });
 
         fw.watch(dir.path);
 
@@ -111,9 +174,9 @@ class TestRunner extends DocTestRunner {
 
 
     public function testFileMacros() {
-        assertEquals(Sys.getCwd(), FileMacros.getProjectRoot());
+        assertEquals(Path.of(Sys.getCwd()).toString(), Path.of(FileMacros.getProjectRoot()).toString());
 
-        var targetPath:String = FileMacros.resolvePath("target");
+        var targetPath:String = FileMacros.resolvePath("test");
         assertTrue(targetPath.length > 6);
 
         var license:String = FileMacros.readString("LICENSE.txt");

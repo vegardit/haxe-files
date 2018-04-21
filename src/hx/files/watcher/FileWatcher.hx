@@ -27,12 +27,20 @@ enum FileSystemEvent {
 
     DIR_DELETED(dir:Dir);
 
+    /**
+     * @param old attributes at the time before the event occured, may be null depending on implementation
+     * @param now attributes at the time when the event occured, may be null depending on implementation
+     */
     DIR_MODIFIED(dir:Dir, old:DirAttrs, now:DirAttrs);
 
     FILE_CREATED(file:File);
 
     FILE_DELETED(file:File);
 
+    /**
+     * @param old attributes at the time before the event occured, may be null depending on implementation
+     * @param now attributes at the time when the event occured, may be null depending on implementation
+     */
     FILE_MODIFIED(file:File, old:FileAttrs, now:FileAttrs);
 }
 
