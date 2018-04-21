@@ -36,7 +36,7 @@ class FileMacros {
     macro
     public static function resolvePath(relativePath:String):ExprOf<String> {
         var absPath = Path.of(Context.resolvePath(relativePath)).getAbsolutePath();
-        return toExpr(absPath);
+        return toExpr(absPath.toString());
     }
 
 
@@ -48,6 +48,9 @@ class FileMacros {
     }
 
 
+    /**
+     * Reads the content of the given file and ensures that it is XML parseable.
+     */
     macro
     public static function readXmlString(filePath:String):ExprOf<String> {
         var file = File.of(Context.resolvePath(filePath));

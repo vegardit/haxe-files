@@ -109,6 +109,18 @@ class TestRunner extends DocTestRunner {
         });
     }
 
+
+    public function testFileMacros() {
+        assertEquals(Sys.getCwd(), FileMacros.getProjectRoot());
+
+        var targetPath:String = FileMacros.resolvePath("target");
+        assertTrue(targetPath.length > 6);
+
+        var license:String = FileMacros.readString("LICENSE.txt");
+        assertTrue(license.indexOf("Apache") > 0);
+    }
+
+
     var _asyncExecutor = Executor.create(10);
     var _asyncTests = new AtomicInt(0);
     function _later(delayMS:Int, fn:Void->Void) {
