@@ -84,12 +84,14 @@ class MyClass {
 
         f.size(); // returns the file size
 
-        var fCopy = f.copyTo("mydir/myfile2.txt");
-        fCopy.delete();
+        f.copyTo("mydir/myfile2.txt");               // throws an exception if myfile2.txt exists already
+        f.copyTo("mydir/myfile2.txt", [OVERWRITE]);  // replaces myfile2.txt if it exists already
 
-        var fNew = f.moveTo("otherdir/MY_FILE.txt");
-        f.exists(); // now returns false
-        fNew.exists(); // returns true
+        f.delete();  // deletes the file
+
+        var f2 = f.moveTo("otherdir/MY_FILE.txt");
+        f.exists();  // returns false
+        f2.exists(); // returns true
     }
 }
 ```
@@ -127,6 +129,11 @@ class MyClass {
                trace(dir);
            }
         );
+
+        d.copyTo("myproject2");                     // recursively copy the directory
+        d.copyTo("myproject2", [OVERWRITE]);        // delete myproject2 and recursively copy the directory
+        d.copyTo("myproject2", [MERGE]);            // merge the files and folders into myproject2 but skip conflicting files
+        d.copyTo("myproject2", [MERGE, OVERWRITE]); // merge the files and folders into myproject2 and replace conflicting files
 
         d.delete(true);  // recursively delete the directory
     }
