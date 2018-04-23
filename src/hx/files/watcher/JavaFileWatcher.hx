@@ -30,9 +30,9 @@ typedef JPath = hx.files.internal.externs.java.nio.file.Path;
  * Java 7 WatchService based implementation. See https://docs.oracle.com/javase/tutorial/essential/io/notification.html
  *
  * Current limitations:
- * a) Only directory, not files can be watched.
- * b) The folder to watch must exist.
- * c) Recursive watching only works on Windows. See https://stackoverflow.com/questions/18701242/how-to-watch-a-folder-and-subfolders-for-changes
+ * a) Only directories, not single files directly can be watched.
+ * b) The directory to watch must exist.
+ * c) Recursive watching (sub-directories) only works on Windows. See https://stackoverflow.com/questions/18701242/how-to-watch-a-folder-and-subfolders-for-changes
  *
  * @author Sebastian Thomschke, Vegard IT GmbH
  */
