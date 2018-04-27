@@ -64,12 +64,12 @@ class File {
 
 
     #if (sys || macro)
-    function openInput(binary = true):FileInput {
+    public function openInput(binary = true):FileInput {
         return sys.io.File.read(toString(), binary);
     }
 
 
-    function openOutput(mode:FileWriteMode, binary = true):FileOutput {
+    public function openOutput(mode:FileWriteMode, binary = true):FileOutput {
         return switch(mode) {
             case REPLACE: sys.io.File.write(toString(), binary);
             #if (haxe_ver >= 4.0)
