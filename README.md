@@ -8,6 +8,7 @@
 1. [The `Path` class](#path-class)
 1. [The `File` class](#file-class)
 1. [The `Dir` class](#dir-class)
+1. [The `GlobPatterns` class](#globpatterns-class)
 1. [File watching](#file-watching)
 1. [Installation](#installation)
 1. [Using the latest code](#latest)
@@ -34,8 +35,12 @@ Requires Haxe 3.4 or higher.
 ## <a name="path-class"></a>The `Path` class
 
 Instances of the [hx.files.Path](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/Path.hx)  class represent the path to a file or directory on the local file system.
+It can be seen as an improved and extended version of the built-in [haxe.io.Path](http://api.haxe.org/haxe/io/Path.html) class.
+In contrast to functions provided by haxe.io.Path, there are no situations where the result of a function is unspecified.
 
-There exist two implementations: one for Windows path (using backslash as directory separator) and one for Unix/Linux style paths (using slash as directory separator).
+There exist two implementations:
+- `haxe.io.Path.WindowsPath` for Windows path, i.e. backslash is used as directory separator and paths starting with a drive letter or a UNC path are considered absolute
+- `haxe.io.Path.UnixPath` for Unix/Linux style paths, i.e. slash is used as directory separator and paths starting with a slash are considered absolute.
 
 ```haxe
 package com.example;
@@ -53,10 +58,27 @@ class MyClass {
         p.filenameExt;   // returns "txt"
         p.filenameStem;  // returns "myfile"
         p.isAbsolute;    // returns true
-        p.isFile();      // returns true
-        p.isDirectory(); // returns false
         p.exists();      // returns true or false depending on physical existance of the path
+        p.isFile();      // returns true if exits and points to a file
+        p.isDirectory(); // returns true if exits and points to a directory
         p.parent;        // returns Path object pointing to "C:\\mydir"
+        p.root;          // returns Path object pointing to "C:\\"
+
+        // path joining
+        var p = Path.win("C:\\mydir");
+        p.join("project1\src");  // returns Path object pointing to "C:\\mydir\\project1\\src"
+
+        // getting absolute path
+        var p = Path.of("mydir");
+        p.getAbsolutePath();   // returns the absolute path as string
+
+        // normalizing a path
+        var p = Path.unix("aaa/bbb/ccc/../../ddd");
+        p.normalize();   // returns Path object pointing to "aaa/ddd"
+
+        // ellipszing
+        Path.unix("/home/user/foo/bar").ellipsize(15);           // returns "/home/.../bar"
+        Path.win("C:\\Users\\Default\\Desktop\\").ellipsize(15); // returns "C:\...\Desktop"
     }
 }
 ```
@@ -136,6 +158,34 @@ class MyClass {
         d.copyTo("myproject2", [MERGE, OVERWRITE]); // merge the files and folders into myproject2 and replace conflicting files
 
         d.delete(true);  // recursively delete the directory
+    }
+}
+```
+
+
+## <a name="globpatterns-class"></a>The `GlobPatterns` class
+
+The [hx.files.GlobPatterns](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/GlobPatterns.hx) contains static methods to convert
+(glob patterns)[https://en.wikipedia.org/wiki/Glob_(programming)] into regular expressions.
+
+```haxe
+package com.example;
+
+import hx.files.*;
+
+class MyClass {
+
+    static function main() {
+        GlobPatterns.toRegEx("*.txt");       // returns == "^[^\\\\^\\/]*\\.txt$"
+        GlobPatterns.toRegEx("*file*");      // returns "^[^\\\\^\\/]*file[^\\\\^\\/]*$"
+        GlobPatterns.toRegEx("file?.txt");   // returns "^file[^\\\\^\\/]\\.txt$"
+        GlobPatterns.toRegEx("file[A-Z]");   // returns "^file[A-Z]$"
+        GlobPatterns.toRegEx("file[!A-Z]");  // returns "^file[^A-Z]$"
+
+        GlobPatterns.toEreg("src/**/*.hx").match("src/haxe/strings/Char.hx");            // returns true
+        GlobPatterns.toEreg("assets/**/*.{js,css}").match("assets/theme/dark/dark.css"); // returns true
+        GlobPatterns.toEreg("SystemOut[0-9].log").match("SystemOut1.log");               // returns true
+        GlobPatterns.toEreg("SystemOut[!0-9].log").match("SystemOut1.log");              // returns false
     }
 }
 ```
