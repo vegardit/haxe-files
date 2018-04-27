@@ -889,7 +889,7 @@ class Path {
      * >>> Path.win("C:\\Users\\Default\\Desktop\\"     ).ellipsize(7,  false) == "..."
      * >>> Path.win("C:\\Users\\Default\\Desktop\\"     ).ellipsize(12, false) == "...\\Desktop"
      * >>> Path.win("C:\\Users\\Default\\Desktop\\..\\..\\John").ellipsize(15) == "C:\\Users\\John"
-     *>>>  Path.win("\\\\winserver\\documents\\text.doc").ellipsize(25)        == "\\\\winserver\\...\\text.doc"
+     * >>> Path.win("\\\\winserver\\documents\\text.doc").ellipsize(25)        == "\\\\winserver\\...\\text.doc"
      * >>> Path.win(""  ).ellipsize(3) == ""
      * >>> Path.win("." ).ellipsize(0) throws "[maxLength] must not be smaller than 1"
      * >>> Path.win(null).ellipsize(3) == null
