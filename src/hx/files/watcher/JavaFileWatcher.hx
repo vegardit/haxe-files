@@ -100,7 +100,6 @@ class JavaFileWatcher extends AbstractFileWatcher {
                                 eventDispatcher.fire(FileSystemEvent.FILE_MODIFIED(path.toFile(), null, null));
                             }
                         case "ENTRY_DELETE": {
-                            trace(entry.existingDirs);
                             if (entry.existingDirs.contains(relPath)) {
                                 entry.existingDirs.remove(relPath);
                                 eventDispatcher.fire(FileSystemEvent.DIR_DELETED(path.toDir()));
