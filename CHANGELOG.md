@@ -6,8 +6,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased]
 
+
+## [1.1.1] - 2018-08-22
+
 ### Fixed
 - [PR#1](https://github.com/vegardit/haxe-files/pull/1) File#openInput() and File#openOutput() not visible
+- removed left-over trace statement
 
 
 ## [1.1.0] - 2018-04-24
