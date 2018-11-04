@@ -166,7 +166,7 @@ class MyClass {
 ## <a name="globpatterns-class"></a>The `GlobPatterns` class
 
 The [hx.files.GlobPatterns](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/GlobPatterns.hx) class contains static methods to convert
-[glob patterns](https://en.wikipedia.org/wiki/Glob_(programming%29) into regular expressions.
+[glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) into regular expressions.
 
 ```haxe
 package com.example;
