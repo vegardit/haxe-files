@@ -547,8 +547,13 @@ class Path {
         #elseif php
             return untyped __php__("is_file($this->toString())");
         #elseif python
-            python.Syntax.pythonCode("import os");
-            return python.Syntax.pythonCode("os.path.isfile(self.toString())");
+            #if (haxe_ver >= 4)
+                python.Syntax.code("import os");
+                return python.Syntax.code("os.path.isfile(self.toString())");
+            #else
+                python.Syntax.pythonCode("import os");
+                return python.Syntax.pythonCode("os.path.isfile(self.toString())");
+            #end
         #else
             return !isDirectory();
         #end
