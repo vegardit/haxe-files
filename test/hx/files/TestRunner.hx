@@ -121,11 +121,18 @@ class TestRunner extends DocTestRunner {
             fw.stop();
             ex.stop();
 
-            assertEquals(4, events.length);
+            assertTrue(events.length == 4 || events.length == 5);
             assertTrue(switch(events[0]) { case FILE_CREATED(_):  true; default: false; });
-            assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
-            assertTrue(switch(events[2]) { case FILE_MODIFIED(_): true; default: false; });
-            assertTrue(switch(events[3]) { case FILE_DELETED(_):  true; default: false; });
+            if (events.length == 4) {
+                assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
+                assertTrue(switch(events[2]) { case FILE_MODIFIED(_): true; default: false; });
+                assertTrue(switch(events[3]) { case FILE_DELETED(_):  true; default: false; });
+            } else {
+                assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
+                assertTrue(switch(events[2]) { case FILE_MODIFIED(_): true; default: false; });
+                assertTrue(switch(events[3]) { case FILE_MODIFIED(_): true; default: false; });
+                assertTrue(switch(events[4]) { case FILE_DELETED(_):  true; default: false; });
+            }
         });
     }
 
