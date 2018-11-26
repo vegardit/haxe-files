@@ -156,9 +156,9 @@ class TestRunner extends DocTestRunner {
         });
 
         var dir = Dir.of("target/filewatcher_test");
+        dir.delete(true);
         var subdir = dir.path.join("abc/def").toDir();
         var file = subdir.path.join("test.txt").toFile();
-        dir.delete(true);
 
         fw.watch(dir.path);
 
@@ -171,11 +171,11 @@ class TestRunner extends DocTestRunner {
         _later( 400, function() { file.appendString("456"); trace("-> append: "  + file  ); });
         _later(1500, function() { subdir.delete(true);      trace("-> delete: "  + subdir); });
         _later(1800, function() { dir.delete(true);         trace("-> delete: "  + dir   ); });
-        _later(2000, function() {
+        _later(2200, function() {
             fw.stop();
             ex.stop();
 
-            assertTrue(events.length > 6);
+            assertTrue(events.length > 5);
         });
     }
 
