@@ -3,43 +3,10 @@ REM Copyright (c) 2016-2018 Vegard IT GmbH, https://vegardit.com
 REM SPDX-License-Identifier: Apache-2.0
 REM Author: Sebastian Thomschke, Vegard IT GmbH
 
-pushd .
-
-REM cd into project root
-cd %~dp0..
-
-echo Cleaning...
-if exist dump\flash rd /s /q dump\flash
-if exist target\flash rd /s /q target\flash
-
-haxelib list | findstr haxe-concurrent >NUL
-if errorlevel 1 (
-    echo Installing [haxe-concurrent]...
-    haxelib install haxe-concurrent
-)
-
-haxelib list | findstr haxe-doctest >NUL
-if errorlevel 1 (
-    echo Installing [haxe-doctest]...
-    haxelib install haxe-doctest
-)
-
-haxelib list | findstr haxe-strings >NUL
-if errorlevel 1 (
-    echo Installing [haxe-strings]...
-    haxelib install haxe-strings
-)
+call %~dp0_test-prepare.cmd flash
 
 echo Compiling...
-haxe -main hx.files.TestRunner ^
-  -lib haxe-concurrent ^
-  -lib haxe-doctest ^
-  -lib haxe-strings ^
-  -cp src ^
-  -cp test ^
-  -dce full ^
-  -debug ^
-  -D dump=pretty ^
+haxe %~dp0..\tests.hxml ^
   -D no-swf-compress ^
   -D swf-script-timeout=180 ^
   -swf-version 11.5 ^
@@ -62,7 +29,8 @@ set target_dir_absolute=%RETVAL%
 ) > "%HOME%\AppData\Roaming\Macromedia\Flash Player\#Security\FlashPlayerTrust\HaxeDoctest.cfg"
 
 echo Testing...
-flashplayer_29_sa_debug "%~dp0..\target\flash\TestRunner.swf"
+for /f "delims=" %%A in ('where flashplayer_*_sa_debug.exe') do set "flashplayer_path=%%A"
+%flashplayer_path% "%~dp0..\target\flash\TestRunner.swf"
 set rc=%errorlevel%
 
 REM printing log file

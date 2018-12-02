@@ -1,8 +1,12 @@
+extraParams.hxml
 -cp src
 -cp test
 -main hx.files.TestRunner
+-lib haxe-concurrent
 -lib haxe-doctest
+-lib haxe-strings
 -dce full
 -debug
+-D dump=pretty
 -swf-version 11.5
 -D net-ver=45
