@@ -50,6 +50,7 @@ class File {
         this.path = path;
     }
 
+    #if (filesystem_support || macro)
 
     function assertValidPath(mustExist = true) {
         if (path.filename.isEmpty())
@@ -491,6 +492,7 @@ class File {
         #end
     }
 
+    #end // filesystem_support
 
     /**
       * @return the file's path

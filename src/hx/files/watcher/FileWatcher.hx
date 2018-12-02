@@ -11,6 +11,8 @@ import hx.concurrent.event.EventListenable;
 import hx.concurrent.executor.Executor;
 import hx.strings.internal.Either2;
 
+#if (filesystem_support || macro)
+
 /**
  * @author Sebastian Thomschke, Vegard IT GmbH
  */
@@ -144,3 +146,5 @@ class AbstractFileWatcher extends ServiceBase implements EventListenable<FileSys
     public function watch(path:Either2<Path, String>):Void throw "Not implemented.";
     public function unwatch(path:Either2<Path, String>):Void throw "Not implemented.";
 }
+
+#end //filesystem_support

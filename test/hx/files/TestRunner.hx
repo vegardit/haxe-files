@@ -9,14 +9,16 @@ import hx.concurrent.executor.Executor;
 import hx.concurrent.internal.Dates;
 import hx.concurrent.lock.RLock;
 import hx.doctest.DocTestRunner;
+#if filesystem_support
 import hx.files.watcher.FileWatcher.FileSystemEvent;
 import hx.files.watcher.PollingFileWatcher;
+#end
 import hx.strings.internal.OS;
 
 /**
  * @author Sebastian Thomschke, Vegard IT GmbH
  */
-@:build(hx.doctest.DocTestGenerator.generateDocTests("src", ".*\\.hx"))
+@:build(hx.doctest.DocTestGenerator.generateDocTests("src", ".*(GlobPatterns)\\.hx"))
 @:keep // prevent DCEing of manually created testXYZ() methods
 class TestRunner extends DocTestRunner {
 
@@ -72,7 +74,7 @@ class TestRunner extends DocTestRunner {
         Sys.sleep(0.2); dir.path.join("foo").toDir().delete(true);
         Sys.sleep(0.2);
 
-        assertTrue(events.length > 3);
+        assertMin(events.length, 4);
 
         fw.unwatch(dir.path);
 
@@ -91,6 +93,7 @@ class TestRunner extends DocTestRunner {
     #end
 
 
+    #if filesystem_support
     public function testPollingFileWatcher_SingleFile():Void {
         var ex = Executor.create();
         var fw = new PollingFileWatcher(ex, 100);
@@ -121,7 +124,7 @@ class TestRunner extends DocTestRunner {
             fw.stop();
             ex.stop();
 
-            assertTrue(events.length == 4 || events.length == 5);
+            assertInRange(events.length, 4, 5);
             assertTrue(switch(events[0]) { case FILE_CREATED(_):  true; default: false; });
             if (events.length == 4) {
                 assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
@@ -178,16 +181,20 @@ class TestRunner extends DocTestRunner {
             assertTrue(events.length > 5);
         });
     }
-
+    #end // filesystem_support
 
     public function testFileMacros() {
-        assertEquals(Path.of(Sys.getCwd()).toString(), Path.of(FileMacros.getProjectRoot()).toString());
+        assertMin(Dir.of(FileMacros.getProjectRoot()).toString().length, 2);
+
+        #if filesystem_support
+            assertEquals(Dir.getCWD().toString(), Dir.of(FileMacros.getProjectRoot()).toString());
+        #end
 
         var targetPath:String = FileMacros.resolvePath("test");
-        assertTrue(targetPath.length > 6);
+        assertMin(targetPath.length, 7);
 
         var license:String = FileMacros.readString("LICENSE.txt");
-        assertTrue(license.indexOf("Apache") > 0);
+        assertMin(license.indexOf("Apache"), 0);
     }
 
 
@@ -227,22 +234,7 @@ class TestRunner extends DocTestRunner {
                 }
 
                 var exitCode = results.getFailureCount() == 0 ? 0 : 1;
-                #if travix
-                    travix.Logger.exit(exitCode);
-                #else
-                    #if sys
-                        Sys.exit(exitCode);
-                    #elseif js
-                        var isPhantomJS = untyped __js__("(typeof phantom !== 'undefined')");
-                        if(isPhantomJS) {
-                            untyped __js__("phantom.exit(exitCode)");
-                        } else {
-                            untyped __js__("process.exit(exitCode)");
-                        }
-                    #elseif flash
-                        flash.system.System.exit(exitCode);
-                    #end
-                #end
+                hx.doctest.DocTestRunner.exit(exitCode);
             }
         };
     }

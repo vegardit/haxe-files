@@ -225,6 +225,7 @@ class Path {
     }
 
 
+    #if (filesystem_support || macro)
     /**
      * <b>IMPORTANT:</b> Performs I/O operation.
      *
@@ -255,7 +256,11 @@ class Path {
 
         #if php
             // workaround for https://github.com/HaxeFoundation/haxe/issues/6960
-            untyped __php__("clearstatcache($path)");
+            #if (haxe_ver >= 4)
+                php.Syntax.code("clearstatcache({0})", path);
+            #else
+                untyped __php__("clearstatcache($path)");
+            #end
         #end
 
         #if lua
@@ -269,6 +274,7 @@ class Path {
             throw "Operation not supported on current target.";
         #end
     }
+    #end
 
 
     /**
@@ -424,6 +430,7 @@ class Path {
         #end
     }
 
+    #if (filesystem_support || macro)
 
     #if (sys || macro || nodejs)
     /**
@@ -463,11 +470,7 @@ class Path {
         var path = toString();
 
         #if (sys || macro || nodejs)
-            #if php
-                // workaround for https://github.com/HaxeFoundation/haxe/issues/6960
-                untyped __php__("clearstatcache($path)");
-                return 1000 * untyped __php__("filemtime($path)");
-            #elseif python
+            #if python
                 // workaround to get ms precision
                 return 1000 * python.lib.Os.stat(path).st_mtime;
             #else
@@ -542,23 +545,21 @@ class Path {
             return untyped __java__("new java.io.File(toString()).isFile()");
         #elseif (nodejs && !macro)
             return js.node.Fs.statSync(toString()).isFile();
-        #elseif phantomjs
+        #elseif (phantomjs && !macro)
             return js.phantomjs.FileSystem.isFile(toString());
         #elseif php
-            return untyped __php__("is_file($this->toString())");
-        #elseif python
             #if (haxe_ver >= 4)
-                python.Syntax.code("import os");
-                return python.Syntax.code("os.path.isfile(self.toString())");
+                return php.Syntax.code("is_file({0})", toString());
             #else
-                python.Syntax.pythonCode("import os");
-                return python.Syntax.pythonCode("os.path.isfile(self.toString())");
+                return untyped __php__("is_file($this->toString())");
             #end
+        #elseif python
+            return python.lib.os.Path.isfile(toString());
         #else
             return !isDirectory();
         #end
     }
-
+    #end // filesystem_support
 
     /**
      * Joins the given parts.

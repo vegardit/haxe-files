@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased]
 
+### Added
+- Dir.getUserHome()
+- automatically set compiler define 'filesystem_support' if the target can access the local filesystem
+
+### Fixed
+- Dir.copyTo() with MERGE not working with PhantomJS
+- Dir.getCWD() not working with PhantomJS
+
 
 ## [1.1.1] - 2018-08-22
 

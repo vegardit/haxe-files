@@ -11,6 +11,13 @@ import sys.FileStat;
 import sys.FileSystem;
 #end
 
+#if java
+import java.lang.System;
+#elseif cs
+import cs.system.Environment;
+import cs.system.Environment.Environment_SpecialFolder;
+#end
+
 using hx.strings.Strings;
 
 /**
@@ -20,20 +27,59 @@ using hx.strings.Strings;
  */
 class Dir {
 
+    #if (filesystem_support || macro)
 
     /**
-      * @return the current working directory
-      */
+     * <pre><code>
+     * >>> Dir.getCWD().path.exists()      == true
+     * >>> Dir.getCWD().path.isDirectory() == true
+     * </code></pre>
+     *
+     * @return the current working directory
+     */
     public static function getCWD():Dir {
-        #if sys
+        #if (sys || nodejs)
             return of(Sys.getCwd());
-        #elseif phantomjs
-            return of(js.phantomjs.FileSystem.workingDirectory());
+        #elseif (phantomjs && !macro)
+            return of(js.phantomjs.FileSystem.workingDirectory);
         #else
             throw "Operation not supported on current target.";
         #end
     }
 
+
+    /**
+     * <pre><code>
+     * >>> Dir.getUserHome().path.exists()      == true
+     * >>> Dir.getUserHome().path.isDirectory() == true
+     * </code></pre>
+     *
+     * @return the user's home directory
+     */
+    public static function getUserHome():Dir {
+        #if cs
+            return Dir.of(Environment.GetFolderPath(Environment_SpecialFolder.UserProfile));
+        #elseif java
+            return Dir.of(System.getProperty("user.home"));
+        #elseif python
+            return Dir.of(python.lib.os.Path.expanduser("~"));
+        #elseif (phantomjs && !macro)
+            untyped __js__("var system = require('system');");
+            if (hx.strings.internal.OS.isWindows) {
+                return Dir.of("" + untyped __js__("system.env['HOMEDRIVE']") + untyped __js__("system.env['HOMEPATH']"));
+            }
+            return Dir.of("" + untyped __js__("system.env['HOME']"));
+        #elseif (sys || nodejs)
+            if (hx.strings.internal.OS.isWindows) {
+                return Dir.of(Sys.getEnv("HOMEDRIVE") + Sys.getEnv("HOMEPATH"));
+            }
+            return Dir.of(Sys.getEnv("HOME"));
+        #else
+            throw "Operation not supported on current target.";
+        #end
+    }
+
+    #end // filesystem_support
 
     /**
      * This method does not check if the path actually exists and if it currently points to a directory or a file
@@ -59,6 +105,7 @@ class Dir {
         this.path = path;
     }
 
+    #if (filesystem_support || macro)
 
     function assertValidPath(mustExist = true) {
         if (path.filename.isEmpty())
@@ -110,7 +157,7 @@ class Dir {
         #elseif (sys || macro || nodejs)
             FileSystem.createDirectory(path.toString());
             return true;
-        #elseif js
+        #elseif phantomjs
             js.phantomjs.FileSystem.makeTree(path.toString());
             return true;
         #else
@@ -183,7 +230,13 @@ class Dir {
                 targetDir.delete(true);
         }
 
-        #if (sys || macro || nodejs)
+        #if (sys || macro || nodejs || phantomjs)
+            #if (phantomjs && !macro)
+                if (!merge) {
+                    js.phantomjs.FileSystem.copyTree(path.toString(), targetPath.toString());
+                    return targetDir;
+                }
+            #end
             var sourcPathLen = toString().length;
             targetDir.create();
             walk(
@@ -199,13 +252,10 @@ class Dir {
                     return true;
                 }
             );
-        #elseif phantomjs
-            js.phantomjs.FileSystem.copyTree(path.toString(), targetPath.toString());
+            return targetDir;
         #else
             throw "Operation not supported on current target.";
         #end
-
-        return targetDir;
     }
 
 
@@ -255,27 +305,24 @@ class Dir {
         if (!recursively && !isEmpty())
             throw 'Cannot delete directory "$path" because it is not empty!';
 
-        #if phantomjs
+        #if (phantomjs && !macro)
             js.phantomjs.FileSystem.removeTree(path.toString());
-            return true;
-        #end
-
-        var dirs:Array<Dir> = [];
-        walk(
-            function(file) file.delete(),
-            function(dir) { dirs.push(dir); return true; }
-        );
-        dirs.reverse();
-        dirs.push(this);
-        for (dir in dirs) {
-            #if (sys || macro || nodejs)
+        #elseif (sys || nodejs)
+            var dirs:Array<Dir> = [];
+            walk(
+                function(file) file.delete(),
+                function(dir) { dirs.push(dir); return true; }
+            );
+            dirs.reverse();
+            dirs.push(this);
+            for (dir in dirs) {
                 FileSystem.deleteDirectory(dir.path.toString());
-            #else
-                throw "Operation not supported on current target.";
-            #end
-        }
-
+            }
+        #else
+            throw "Operation not supported on current target.";
+        #end
         return true;
+
     }
 
 
@@ -592,6 +639,8 @@ class Dir {
             }
         }
     }
+
+    #end // filesystem_support
 
     inline
     public function toString():String {

@@ -13,8 +13,7 @@ import hx.strings.collection.StringArray;
 import hx.strings.collection.StringMap;
 import hx.strings.internal.Either2;
 
-
-#if (sys || macro || nodejs || phantomjs)
+#if (filesystem_support || macro)
 
 /**
  * @author Sebastian Thomschke, Vegard IT GmbH
@@ -156,8 +155,9 @@ class PollingFileWatcher extends AbstractFileWatcher {
                         eventDispatcher.fire(FileSystemEvent.FILE_DELETED(file));
                         compareFSEntry(FSEntry.NONEXISTANT(dir.path), now);
                     case FILE(_, attrsNow):
-                        if(!attrs.equals(attrsNow))
+                        if (!attrs.equals(attrsNow)) {
                             eventDispatcher.fire(FileSystemEvent.FILE_MODIFIED(file, attrs, attrsNow));
+                        }
                     case NONEXISTANT(_) | UNKNOWN(_):
                         eventDispatcher.fire(FileSystemEvent.FILE_DELETED(file));
                     case UNSCANNED(_):
@@ -281,5 +281,4 @@ private enum FSEntry {
     UNSCANNED(path:Path);
     UNKNOWN(path:Path);
 }
-
-#end
+#end //filesystem_support
