@@ -218,7 +218,7 @@ class MyClass {
 
     static function main() {
 
-        var ex = new Executor(); // executor is used to schedule scanning tasks and
+        var ex = Executor.create(); // executor is used to schedule scanning tasks and
         var fw = new PollingFileWatcher(ex, 100 /*polling interval in MS*/);
 
         // register an event listener
@@ -227,9 +227,9 @@ class MyClass {
                 case DIR_CREATED(dir):       trace('Dir created: $dir');
                 case DIR_DELETED(dir):       trace('Dir deleted: $dir');
                 case DIR_MODIFIED(dir, _):   trace('Dir modified: $dir');
-                case FILE_CREATED(file);     trace('File created: $file');
-                case FILE_DELETED(file);     trace('File deleted: $file');
-                case FILE_MODIFIED(file, _); trace('File modified: $file');
+                case FILE_CREATED(file):     trace('File created: $file');
+                case FILE_DELETED(file):     trace('File deleted: $file');
+                case FILE_MODIFIED(file, _): trace('File modified: $file');
             }
         });
 
