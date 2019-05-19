@@ -9,7 +9,7 @@
         "vegardit"
     ],
     "releasenote": "See https://github.com/vegardit/haxe-files/blob/master/CHANGELOG.md",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "dependencies": {
         "haxe-concurrent": "",
         "haxe-strings": ""

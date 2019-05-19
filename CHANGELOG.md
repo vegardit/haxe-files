@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased]
 
+
+## [1.2.0] - 2019-05-19
+
 ### Added
 - Dir.getUserHome()
 - automatically set compiler define 'filesystem_support' if the target can access the local filesystem
