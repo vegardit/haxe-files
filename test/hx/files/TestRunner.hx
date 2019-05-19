@@ -116,8 +116,8 @@ class TestRunner extends DocTestRunner {
         file.delete();
         fw.watch(file.path);
 
-        _later(  50, function() { file.writeString("123");    trace("-> create: "  + file ); });
-        _later( 400, function() { file.appendString("456");   trace("-> append: "  + file ); });
+        _later( 100, function() { file.writeString("123");    trace("-> create: "  + file ); });
+        _later( 600, function() { file.appendString("456");   trace("-> append: "  + file ); });
         _later(1800, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
         _later(2000, function() { file.delete();              trace("-> delete: "  + file ); });
         _later(2200, function() {
