@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased]
 
+### Fixed
+- [Issue#3](https://github.com/vegardit/haxe-files/issues/3) `Enum<cs.system.Environment_SpecialFolder> has no field UserProfile` on .NET 3.5 or lower
+
 
 ## [1.2.0] - 2019-05-19
 

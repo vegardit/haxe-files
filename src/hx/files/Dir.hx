@@ -58,7 +58,13 @@ class Dir {
      */
     public static function getUserHome():Dir {
         #if cs
+            #if (net_ver < 40)
+            if (Environment.OSVersion.Platform == cs.system.PlatformID.Unix || Environment.OSVersion.Platform == cs.system.PlatformID.MacOSX)
+                return Dir.of(Environment.GetEnvironmentVariable("HOME"));
+            return Dir.of(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"));
+            #else
             return Dir.of(Environment.GetFolderPath(Environment_SpecialFolder.UserProfile));
+            #end
         #elseif java
             return Dir.of(System.getProperty("user.home"));
         #elseif python
