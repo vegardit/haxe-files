@@ -27,7 +27,7 @@ matrix:
   fast_finish: true
   allow_failures:
     - haxe: development
-    - env: HAXE_TARGET=cs  # C# fails because of https://github.com/HaxeFoundation/haxe/issues/6533
+    - env: HAXE_TARGET=cs  # C# fails because of https://github.com/HaxeFoundation/haxe/issues/6533 and https://github.com/HaxeFoundation/haxe/issues/8361
     - env: HAXE_TARGET=lua # Lua fails because of https://github.com/HaxeFoundation/haxe/issues/6946 and PollingFileWatcher because of https://github.com/HaxeFoundation/haxe/issues/6722
     - env: HAXE_TARGET="js -lib phantomjs" # results in "ReferenceError: Can't find variable: require" when executed via travis for unknown reason
     - os: osx
