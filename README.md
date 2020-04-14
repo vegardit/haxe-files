@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/vegardit/haxe-files.svg?branch=master)](https://travis-ci.org/vegardit/haxe-files)
 [![Release](https://img.shields.io/github/release/vegardit/haxe-files.svg)](http://lib.haxe.org/p/haxe-files)
 [![License](https://img.shields.io/github/license/vegardit/haxe-files.svg?label=license)](#license)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 1. [What is it?](#what-is-it)
 1. [The `Path` class](#path-class)
