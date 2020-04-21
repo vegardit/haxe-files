@@ -50,37 +50,37 @@ import hx.files.*;
 
 class MyClass {
 
-    static function main() {
-        var p = Path.of("./mydir/myfile.txt");   // constructing a path compatible with the local operating/file-system
-        var p = Path.unix("/mydir/myfile.txt");     // constructing a Unix-style path
-        var p = Path.win("C:\\mydir\\myfile.txt"); // constructing a Windows-style path
+   static function main() {
+      var p = Path.of("./mydir/myfile.txt");   // constructing a path compatible with the local operating/file-system
+      var p = Path.unix("/mydir/myfile.txt");     // constructing a Unix-style path
+      var p = Path.win("C:\\mydir\\myfile.txt"); // constructing a Windows-style path
 
-        p.filename;      // returns "myfile.txt"
-        p.filenameExt;   // returns "txt"
-        p.filenameStem;  // returns "myfile"
-        p.isAbsolute;    // returns true
-        p.exists();      // returns true or false depending on physical existance of the path
-        p.isFile();      // returns true if exits and points to a file
-        p.isDirectory(); // returns true if exits and points to a directory
-        p.parent;        // returns Path object pointing to "C:\\mydir"
-        p.root;          // returns Path object pointing to "C:\\"
+      p.filename;      // returns "myfile.txt"
+      p.filenameExt;   // returns "txt"
+      p.filenameStem;  // returns "myfile"
+      p.isAbsolute;    // returns true
+      p.exists();      // returns true or false depending on physical existance of the path
+      p.isFile();      // returns true if exits and points to a file
+      p.isDirectory(); // returns true if exits and points to a directory
+      p.parent;        // returns Path object pointing to "C:\\mydir"
+      p.root;          // returns Path object pointing to "C:\\"
 
-        // path joining
-        var p = Path.win("C:\\mydir");
-        p.join("project1\src");  // returns Path object pointing to "C:\\mydir\\project1\\src"
+      // path joining
+      var p = Path.win("C:\\mydir");
+      p.join("project1\src");  // returns Path object pointing to "C:\\mydir\\project1\\src"
 
-        // getting absolute path
-        var p = Path.of("mydir");
-        p.getAbsolutePath();   // returns the absolute path as string
+      // getting absolute path
+      var p = Path.of("mydir");
+      p.getAbsolutePath();   // returns the absolute path as string
 
-        // normalizing a path
-        var p = Path.unix("aaa/bbb/ccc/../../ddd");
-        p.normalize();   // returns Path object pointing to "aaa/ddd"
+      // normalizing a path
+      var p = Path.unix("aaa/bbb/ccc/../../ddd");
+      p.normalize();   // returns Path object pointing to "aaa/ddd"
 
-        // ellipszing
-        Path.unix("/home/user/foo/bar").ellipsize(15);           // returns "/home/.../bar"
-        Path.win("C:\\Users\\Default\\Desktop\\").ellipsize(15); // returns "C:\...\Desktop"
-    }
+      // ellipszing
+      Path.unix("/home/user/foo/bar").ellipsize(15);           // returns "/home/.../bar"
+      Path.win("C:\\Users\\Default\\Desktop\\").ellipsize(15); // returns "C:\...\Desktop"
+   }
 }
 ```
 
@@ -96,26 +96,26 @@ import hx.files.*;
 
 class MyClass {
 
-    static function main() {
+   static function main() {
 
-        var f = Path.of("mydir/myfile.txt").toFile(); // converting a Path instance to a File instance
-        var f = File.of("mydir/myfile.txt");          // creating a File instance from a String path
+      var f = Path.of("mydir/myfile.txt").toFile(); // converting a Path instance to a File instance
+      var f = File.of("mydir/myfile.txt");          // creating a File instance from a String path
 
-        f.touch();                // create an empty file or update the modification timestamp
-        f.writeString("Hello ");  // sets the file's content
-        f.appendString("world!");
+      f.touch();                // create an empty file or update the modification timestamp
+      f.writeString("Hello ");  // sets the file's content
+      f.appendString("world!");
 
-        f.size(); // returns the file size
+      f.size(); // returns the file size
 
-        f.copyTo("mydir/myfile2.txt");               // throws an exception if myfile2.txt exists already
-        f.copyTo("mydir/myfile2.txt", [OVERWRITE]);  // replaces myfile2.txt if it exists already
+      f.copyTo("mydir/myfile2.txt");               // throws an exception if myfile2.txt exists already
+      f.copyTo("mydir/myfile2.txt", [OVERWRITE]);  // replaces myfile2.txt if it exists already
 
-        f.delete();  // deletes the file
+      f.delete();  // deletes the file
 
-        var f2 = f.moveTo("otherdir/MY_FILE.txt");
-        f.exists();  // returns false
-        f2.exists(); // returns true
-    }
+      var f2 = f.moveTo("otherdir/MY_FILE.txt");
+      f.exists();  // returns false
+      f2.exists(); // returns true
+   }
 }
 ```
 
@@ -131,35 +131,35 @@ import hx.files.*;
 
 class MyClass {
 
-    static function main() {
+   static function main() {
 
-        var d = Path.of("myproject").toDir(); // converting a Path instance to a Dir instance
-        var d = Dir.of("myproject");          // creating a Dir instance from a String path
+      var d = Path.of("myproject").toDir(); // converting a Path instance to a Dir instance
+      var d = Dir.of("myproject");          // creating a Dir instance from a String path
 
-        p.setCWD();    // changes the current working directory
-        d.listDirs();  // returns an array of Dir instances for contained directories (non-recursive)
-        d.listFiles(); // returns an array of File instances for contained files (non-recursive)
+      p.setCWD();    // changes the current working directory
+      d.listDirs();  // returns an array of Dir instances for contained directories (non-recursive)
+      d.listFiles(); // returns an array of File instances for contained files (non-recursive)
 
-        d.findFiles("src/**/*.hx");          // returns an array with all Haxe files in the src dir
-        d.findFiles("assets/**/*.{js,css}"); // returns an array with all JS/CSS files in the assets dir
+      d.findFiles("src/**/*.hx");          // returns an array with all Haxe files in the src dir
+      d.findFiles("assets/**/*.{js,css}"); // returns an array with all JS/CSS files in the assets dir
 
-        // recursively visit all contained files and directories
-        d.walk(
-           function(file) {
-               trace(file);
-           },
-           function(dir) {
-               trace(dir);
-           }
-        );
+      // recursively visit all contained files and directories
+      d.walk(
+         function(file) {
+            trace(file);
+         },
+         function(dir) {
+            trace(dir);
+         }
+      );
 
-        d.copyTo("myproject2");                     // recursively copy the directory
-        d.copyTo("myproject2", [OVERWRITE]);        // delete myproject2 and recursively copy the directory
-        d.copyTo("myproject2", [MERGE]);            // merge the files and folders into myproject2 but skip conflicting files
-        d.copyTo("myproject2", [MERGE, OVERWRITE]); // merge the files and folders into myproject2 and replace conflicting files
+      d.copyTo("myproject2");                     // recursively copy the directory
+      d.copyTo("myproject2", [OVERWRITE]);        // delete myproject2 and recursively copy the directory
+      d.copyTo("myproject2", [MERGE]);            // merge the files and folders into myproject2 but skip conflicting files
+      d.copyTo("myproject2", [MERGE, OVERWRITE]); // merge the files and folders into myproject2 and replace conflicting files
 
-        d.delete(true);  // recursively delete the directory
-    }
+      d.delete(true);  // recursively delete the directory
+   }
 }
 ```
 
@@ -176,18 +176,18 @@ import hx.files.*;
 
 class MyClass {
 
-    static function main() {
-        GlobPatterns.toRegEx("*.txt");       // returns == "^[^\\\\^\\/]*\\.txt$"
-        GlobPatterns.toRegEx("*file*");      // returns "^[^\\\\^\\/]*file[^\\\\^\\/]*$"
-        GlobPatterns.toRegEx("file?.txt");   // returns "^file[^\\\\^\\/]\\.txt$"
-        GlobPatterns.toRegEx("file[A-Z]");   // returns "^file[A-Z]$"
-        GlobPatterns.toRegEx("file[!A-Z]");  // returns "^file[^A-Z]$"
+   static function main() {
+      GlobPatterns.toRegEx("*.txt");       // returns == "^[^\\\\^\\/]*\\.txt$"
+      GlobPatterns.toRegEx("*file*");      // returns "^[^\\\\^\\/]*file[^\\\\^\\/]*$"
+      GlobPatterns.toRegEx("file?.txt");   // returns "^file[^\\\\^\\/]\\.txt$"
+      GlobPatterns.toRegEx("file[A-Z]");   // returns "^file[A-Z]$"
+      GlobPatterns.toRegEx("file[!A-Z]");  // returns "^file[^A-Z]$"
 
-        GlobPatterns.toEreg("src/**/*.hx").match("src/haxe/strings/Char.hx");            // returns true
-        GlobPatterns.toEreg("assets/**/*.{js,css}").match("assets/theme/dark/dark.css"); // returns true
-        GlobPatterns.toEreg("SystemOut[0-9].log").match("SystemOut1.log");               // returns true
-        GlobPatterns.toEreg("SystemOut[!0-9].log").match("SystemOut1.log");              // returns false
-    }
+      GlobPatterns.toEreg("src/**/*.hx").match("src/haxe/strings/Char.hx");            // returns true
+      GlobPatterns.toEreg("assets/**/*.{js,css}").match("assets/theme/dark/dark.css"); // returns true
+      GlobPatterns.toEreg("SystemOut[0-9].log").match("SystemOut1.log");               // returns true
+      GlobPatterns.toEreg("SystemOut[!0-9].log").match("SystemOut1.log");              // returns false
+   }
 }
 ```
 
@@ -217,32 +217,32 @@ import hx.files.watcher.*;
 
 class MyClass {
 
-    static function main() {
+   static function main() {
 
-        var ex = Executor.create(); // executor is used to schedule scanning tasks and
-        var fw = new PollingFileWatcher(ex, 100 /*polling interval in MS*/);
+      var ex = Executor.create(); // executor is used to schedule scanning tasks and
+      var fw = new PollingFileWatcher(ex, 100 /*polling interval in MS*/);
 
-        // register an event listener
-        fw.subscribe(function (event) {
-            switch(event) {
-                case DIR_CREATED(dir):       trace('Dir created: $dir');
-                case DIR_DELETED(dir):       trace('Dir deleted: $dir');
-                case DIR_MODIFIED(dir, _):   trace('Dir modified: $dir');
-                case FILE_CREATED(file):     trace('File created: $file');
-                case FILE_DELETED(file):     trace('File deleted: $file');
-                case FILE_MODIFIED(file, _): trace('File modified: $file');
-            }
-        });
+      // register an event listener
+      fw.subscribe(function (event) {
+         switch(event) {
+            case DIR_CREATED(dir):       trace('Dir created: $dir');
+            case DIR_DELETED(dir):       trace('Dir deleted: $dir');
+            case DIR_MODIFIED(dir, _):   trace('Dir modified: $dir');
+            case FILE_CREATED(file):     trace('File created: $file');
+            case FILE_DELETED(file):     trace('File deleted: $file');
+            case FILE_MODIFIED(file, _): trace('File modified: $file');
+         }
+      });
 
-        fw.watch("myconfig.cfg"); // watch a file
-        fw.watch("assets/foo");   // recursively watch a directory
+      fw.watch("myconfig.cfg"); // watch a file
+      fw.watch("assets/foo");   // recursively watch a directory
 
-        // do some file modifications...
+      // do some file modifications...
 
-        // cleanup
-        fw.stop();
-        ex.stop();
-    }
+      // cleanup
+      fw.stop();
+      ex.stop();
+   }
 }
 ```
 ## <a name="installation"></a>Installation
@@ -293,4 +293,11 @@ haxelib git haxe-files https://github.com/vegardit/haxe-files master D:\haxe-pro
 
 ## <a name="license"></a>License
 
-All files are released under the [Apache License 2.0](https://github.com/vegardit/haxe-files/blob/master/LICENSE.txt).
+All files are released under the [Apache License 2.0](LICENSE.txt).
+
+Individual files contain the following tag instead of the full license text:
+```
+SPDX-License-Identifier: Apache-2.0
+```
+
+This enables machine processing of license information based on the SPDX License Identifiers that are available here: https://spdx.org/licenses/.
