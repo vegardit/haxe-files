@@ -37,7 +37,7 @@ matrix:
   fast_finish: true
   allow_failures:
     - haxe: development
-    - env: HAXE_TARGET=cs  # C# fails because of https://github.com/HaxeFoundation/haxe/issues/6533 and https://github.com/HaxeFoundation/haxe/issues/8361
+    - env: HAXE_TARGET=flash # see https://github.com/travis-ci/travis-ci/issues/8481
     - env: HAXE_TARGET="java -D jvm" # no idea why it fails on travis. works locally
     - os: osx
   exclude:
