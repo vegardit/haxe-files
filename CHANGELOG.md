@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [2.0.0] - 2020-04-22
+
 ### Added
 - support eval target
 
