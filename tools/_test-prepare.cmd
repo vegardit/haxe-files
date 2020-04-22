@@ -21,7 +21,7 @@ shift
 
 REM install common libs
 echo Checking required haxelibs...
-for %%i in (haxe-doctest haxe-concurrent haxe-strings) do (
+for %%i in (haxe-doctest haxe-concurrent haxe-strings phantomjs hxnodejs) do (
    haxelib list | findstr %%i >NUL
    if errorlevel 1 (
       echo Installing [%%i]...

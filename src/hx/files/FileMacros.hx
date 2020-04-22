@@ -25,7 +25,7 @@ class FileMacros {
     */
    macro
    public static function getProjectRoot():ExprOf<String> {
-      var cwd = Sys.getCwd();
+      final cwd = Sys.getCwd();
       return toExpr(cwd);
    }
 
@@ -35,15 +35,15 @@ class FileMacros {
     */
    macro
    public static function resolvePath(relativePath:String):ExprOf<String> {
-      var absPath = Path.of(Context.resolvePath(relativePath)).getAbsolutePath();
+      final absPath = Path.of(Context.resolvePath(relativePath)).getAbsolutePath();
       return toExpr(absPath.toString());
    }
 
 
    macro
    public static function readString(filePath:String):ExprOf<String> {
-      var file = File.of(Context.resolvePath(filePath));
-      var content = file.readAsString();
+      final file = File.of(Context.resolvePath(filePath));
+      final content = file.readAsString();
       return toExpr(content);
    }
 
@@ -53,8 +53,8 @@ class FileMacros {
     */
    macro
    public static function readXmlString(filePath:String):ExprOf<String> {
-      var file = File.of(Context.resolvePath(filePath));
-      var content = file.readAsString();
+      final file = File.of(Context.resolvePath(filePath));
+      final content = file.readAsString();
       try Xml.parse(content) catch (e:Dynamic) {
          haxe.macro.Context.error('Invalid XML in [$filePath]: $e', Context.currentPos());
       }

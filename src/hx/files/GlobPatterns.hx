@@ -95,10 +95,10 @@ class GlobPatterns {
       if (globPattern.isEmpty())
          return globPattern;
 
-      var sb = new StringBuilder();
+      final sb = new StringBuilder();
       sb.addChar(Char.CARET);
-      var chars = globPattern.toChars();
-      var charsLenMinus1 = chars.length - 1;
+      final chars = globPattern.toChars();
+      final charsLenMinus1 = chars.length - 1;
       var chPrev:Char = -1;
       var groupDepth = 0;
       var idx = -1;

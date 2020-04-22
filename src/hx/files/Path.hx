@@ -217,7 +217,7 @@ class Path {
 
    function assertIsLocal() {
       if (!isLocal) {
-         var className = Type.getClassName(Type.getClass(this));
+         final className = Type.getClassName(Type.getClass(this));
          throw 'This path object of type "$className" is not compatible with the local operating/file system';
       }
    }
@@ -240,7 +240,7 @@ class Path {
     * >>> Path.of(null            ).exists() == false
     * </code></pre>
     *
-    * @return true if the path exists (does not check wether it points to a file or a directory)
+    * @return true if the path exists (does not check whether it points to a file or a directory)
     *
     * @throws if path is not compatible with local operating/file system
     */
@@ -250,15 +250,11 @@ class Path {
 
       assertIsLocal();
 
-      var path = toString();
+      final path = toString();
 
       #if php
          // workaround for https://github.com/HaxeFoundation/haxe/issues/6960
-         #if (haxe_ver >= 4)
-            php.Syntax.code("clearstatcache({0})", path);
-         #else
-            untyped __php__("clearstatcache($path)");
-         #end
+         php.Syntax.code("clearstatcache({0})", path);
       #end
 
       #if lua
@@ -308,7 +304,7 @@ class Path {
     * >>> Path.unix(null            ).filename == null
     * </code></pre>
     */
-   public var filename(default, null):String;
+   public final filename:String;
 
 
    /**
@@ -417,7 +413,7 @@ class Path {
 
       assertIsLocal();
 
-      var path = toString();
+      final path = toString();
 
       #if (sys || macro || nodejs)
          return sys.FileSystem.absolutePath(path);
@@ -465,14 +461,14 @@ class Path {
 
       assertIsLocal();
 
-      var path = toString();
+      final path = toString();
 
       #if (sys || macro || nodejs)
          #if python
             // workaround to get ms precision
             return 1000 * python.lib.Os.stat(path).st_mtime;
          #else
-            var stat = sys.FileSystem.stat(path);
+            final stat = sys.FileSystem.stat(path);
             return stat.mtime == null ? stat.ctime.getTime() : stat.mtime.getTime();
          #end
       #elseif phantomjs
@@ -504,7 +500,7 @@ class Path {
 
       assertIsLocal();
 
-      var path = toString();
+      final path = toString();
 
       #if (sys || macro || nodejs)
          return sys.FileSystem.isDirectory(path);
@@ -539,18 +535,14 @@ class Path {
          return "file" == untyped __cpp__('_hx_std_sys_file_type(toString())');
       #elseif cs
          return untyped __cs__("global::System.IO.File.Exists(toString())");
-      #elseif java
+      #elseif java_src
          return untyped __java__("new java.io.File(toString()).isFile()");
       #elseif (nodejs && !macro)
          return js.node.Fs.statSync(toString()).isFile();
       #elseif (phantomjs && !macro)
          return js.phantomjs.FileSystem.isFile(toString());
       #elseif php
-         #if (haxe_ver >= 4)
-            return php.Syntax.code("is_file({0})", toString());
-         #else
-            return untyped __php__("is_file($this->toString())");
-         #end
+         return php.Syntax.code("is_file({0})", toString());
       #elseif python
          return python.lib.os.Path.isfile(toString());
       #else
@@ -596,20 +588,20 @@ class Path {
          }
       }
 
-      var joinWith = switch(path.value) {
+      final joinWith = switch(path.value) {
          case a(str): str;
          case b(obj): obj.toString();
       }
 
       if (joinWith.contains(UnixPath.DIR_SEP) || joinWith.contains(WindowsPath.DIR_SEP)) {
-         var thisPath = toString();
+         final thisPath = toString();
          if (thisPath.endsWith(dirSep))
             return newPathForString(thisPath + joinWith, trimWhiteSpaces);
 
          return newPathForString(thisPath + dirSep + joinWith, trimWhiteSpaces);
       }
 
-      var file = trimWhiteSpaces ? joinWith.trim() : joinWith;
+      final file = trimWhiteSpaces ? joinWith.trim() : joinWith;
       if (file.isEmpty())
          return this;
       return newPathForChild(file);
@@ -648,8 +640,8 @@ class Path {
       if (paths.length == 1)
          return join(paths[0], trimWhiteSpaces);
 
-      var sb = new StringBuilder();
-      var thisPath = toString();
+      final sb = new StringBuilder();
+      final thisPath = toString();
       if (thisPath.isNotEmpty())
          sb.add(thisPath).add(dirSep);
 
@@ -704,7 +696,7 @@ class Path {
     * >>> Path.unix(null                ).parent == null
     * </code></pre>
     */
-   public var parent(default, null):Path;
+   public final parent:Path;
 
 
    /**
@@ -791,7 +783,7 @@ class Path {
       if (filename.isEmpty())
          return filename;
 
-      var path = toString();
+      final path = toString();
       if (path.endsWith(dirSep))
          return path;
       return path + dirSep;
@@ -802,12 +794,12 @@ class Path {
       if (filename == null)
          return null;
 
-      var parts = new StringArray();
+      final parts = new StringArray();
       var part = this;
       while (part != null) {
          parts.push(part.filename);
 
-         var parent = part.parent;
+         final parent = part.parent;
 
          if (parent != null && !parent.filename.endsWith(dirSep))
             parts.push(dirSep);
@@ -852,18 +844,18 @@ class Path {
       if (parent == null)
          return this;
 
-      var isAbsolute = this.isAbsolute;
+      final isAbsolute = this.isAbsolute;
 
-      var parts = new StringArray();
+      final parts = new StringArray();
       var part = this;
       while (part != null) {
-         var parent = part.parent;
+         final parent = part.parent;
          if(parent == null && isAbsolute) break;
          parts.insert(0, part.filename);
          part = parent;
       }
 
-      var resultParts = new StringArray();
+      final resultParts = new StringArray();
       for(part in parts) {
          if(part == ".") {
             if(resultParts.length > 0 || isAbsolute)
@@ -913,12 +905,12 @@ class Path {
     */
    public function ellipsize(maxLength:Int, startFromLeft = true, ellipsis = "..."):String {
 
-      var path = normalize().toString();
+      final path = normalize().toString();
 
       if (path.length8() <= maxLength)
          return path;
 
-      var ellipsisLen = ellipsis.length8();
+      final ellipsisLen = ellipsis.length8();
       if (maxLength < ellipsisLen) {
          if (ellipsisLen > path.length8())
             throw '[maxLength] must not be smaller than ${path.length8()}';
@@ -930,12 +922,12 @@ class Path {
       var leftPartsCount = 0;
       var rightPart = new StringBuilder();
       var rightPartsCount = 0;
-      var pathParts = path.split8(dirSep);
-      var dirSepLen = dirSep.length8();
+      final pathParts = path.split8(dirSep);
+      final dirSepLen = dirSep.length8();
 
       for (i in 0...pathParts.length) {
-         var partToAdd = processLeftSide ? pathParts[leftPartsCount] : pathParts[pathParts.length - rightPartsCount - 1];
-         var newTotalLength = leftPart.length + rightPart.length + ellipsisLen + partToAdd.length8() + dirSepLen;
+         final partToAdd = processLeftSide ? pathParts[leftPartsCount] : pathParts[pathParts.length - rightPartsCount - 1];
+         final newTotalLength = leftPart.length + rightPart.length + ellipsisLen + partToAdd.length8() + dirSepLen;
 
          if (newTotalLength > maxLength)
             break;
@@ -975,15 +967,15 @@ class UnixPath extends Path {
    /**
     * Unix-flavor directory separator (slash)
     */
-   public static inline var DIR_SEP = "/";
+   public static inline final DIR_SEP = "/";
 
 
-   static var NULL(default, never)    = new UnixPath(null, null);
-   static var EMPTY(default, never)   = new UnixPath(null, "");
-   static var ROOT(default, never)    = new UnixPath(null, "/");
-   static var HOME(default, never)    = new UnixPath(null, "~");
-   static var CURRENT(default, never) = new UnixPath(null, ".");
-   static var PARENT(default, never)  = new UnixPath(null, "..");
+   static final NULL    = new UnixPath(null, null);
+   static final EMPTY   = new UnixPath(null, "");
+   static final ROOT    = new UnixPath(null, "/");
+   static final HOME    = new UnixPath(null, "~");
+   static final CURRENT = new UnixPath(null, ".");
+   static final PARENT  = new UnixPath(null, "..");
 
 
    /**
@@ -994,14 +986,14 @@ class UnixPath extends Path {
       if (path == null)
          return NULL;
 
-      var parts = clean(path, trimWhiteSpaces);
+      final parts = clean(path, trimWhiteSpaces);
 
       if (parts.length == 0)
          return EMPTY;
 
       var p:UnixPath = null;
       for (i in 0...parts.length) {
-         var part = parts[i];
+         final part = parts[i];
          if (i == 0) {
             p = switch(part) {
                case "/":  ROOT;
@@ -1017,8 +1009,8 @@ class UnixPath extends Path {
 
 
    static function clean(path:String, trimWhiteSpaces:Bool):StringArray {
-      var parts = path.split8([DIR_SEP, WindowsPath.DIR_SEP]);
-      var cleaned = new StringArray();
+      final parts = path.split8([DIR_SEP, WindowsPath.DIR_SEP]);
+      final cleaned = new StringArray();
 
       for(i in 0...parts.length) {
          var part = parts[i];
@@ -1075,15 +1067,15 @@ class WindowsPath extends Path {
    /**
     * Windows directory separator (backslash)
     */
-   public static inline var DIR_SEP = "\\";
-   public static inline var UNC_PREFIX = "\\\\";
+   public static inline final DIR_SEP = "\\";
+   public static inline final UNC_PREFIX = "\\\\";
 
 
-   static var NULL(default, never)       = new WindowsPath(null, null);
-   static var DRIVE_ROOT(default, never) = new WindowsPath(null, "\\");
-   static var EMPTY(default, never)      = new WindowsPath(null, "");
-   static var CURRENT(default, never)    = new WindowsPath(null, ".");
-   static var PARENT(default, never)     = new WindowsPath(null, "..");
+   static final NULL       = new WindowsPath(null, null);
+   static final DRIVE_ROOT = new WindowsPath(null, "\\");
+   static final EMPTY      = new WindowsPath(null, "");
+   static final CURRENT    = new WindowsPath(null, ".");
+   static final PARENT     = new WindowsPath(null, "..");
 
 
    /**
@@ -1094,7 +1086,7 @@ class WindowsPath extends Path {
       if (path == null)
          return NULL;
 
-      var parts = clean(path, trimWhiteSpaces);
+      final parts = clean(path, trimWhiteSpaces);
 
       if (parts == null || parts.isEmpty())
          return EMPTY;
@@ -1122,8 +1114,8 @@ class WindowsPath extends Path {
       if (path.isEmpty())
          return null;
 
-      var parts = path.split8([DIR_SEP, UnixPath.DIR_SEP]);
-      var cleaned = new StringArray();
+      final parts = path.split8([DIR_SEP, UnixPath.DIR_SEP]);
+      final cleaned = new StringArray();
 
       for (i in 0...parts.length) {
          var part = parts[i];
@@ -1154,20 +1146,20 @@ class WindowsPath extends Path {
          if (cleaned.length == 1)
             throw '[path] UNC path "$path" is missing hostname.';
 
-         var part2 = cleaned[1];
+         final part2 = cleaned[1];
          switch(part2) {
             case "?":
                if (cleaned.length == 2)
                   throw '[path] UNC path "$path" is missing hostname or absolute path.';
 
-               var part3 = cleaned[2];
+               final part3 = cleaned[2];
 
                // \\?\UNC\server\foo\bar\bla.txt
                if (part3.equalsIgnoreCase("UNC")) {
                   if (cleaned.length == 3)
                      throw '[path] UNC path "$path" is missing hostname.';
 
-                  var part4 = cleaned[3];
+                  final part4 = cleaned[3];
 
                   cleaned.shift(); // remove \\
                   cleaned.shift(); // remove ?
@@ -1197,7 +1189,7 @@ class WindowsPath extends Path {
                if (cleaned.length == 2)
                   throw '[path] UNC path "$path" is missing absolute path.';
 
-               var part3 = cleaned[2];
+               final part3 = cleaned[2];
                if (part3.length == 2 && part3.charCodeAt8(0).isAsciiAlpha() && part3.charCodeAt8(1) == Char.COLON) {
 
                   cleaned.shift(); cleaned.shift();
@@ -1214,7 +1206,7 @@ class WindowsPath extends Path {
                cleaned[0] = UNC_PREFIX + part2 + DIR_SEP;
          }
       } else {
-            var part1 = cleaned[0];
+            final part1 = cleaned[0];
             if (part1.length == 2 && part1.charCodeAt8(0).isAsciiAlpha() && part1.charCodeAt8(1) == Char.COLON)
                // set drive letter to upper case
                cleaned[0] = part1.charAt8(0).toUpperCase() + Char.COLON + DIR_SEP;

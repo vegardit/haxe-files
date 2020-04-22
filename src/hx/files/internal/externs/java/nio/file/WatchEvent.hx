@@ -6,12 +6,12 @@ extern interface WatchEvent {
    function context():Dynamic;
 }
 
-@:native("java.nio.file.WatchEvent.Modifier")
+@:native("java.nio.file.WatchEvent$Modifier")
 extern interface WatchEvent_Modifier {
    function name():String;
 }
 
-@:native("java.nio.file.WatchEvent.Kind")
+@:native("java.nio.file.WatchEvent$Kind")
 extern interface WatchEvent_Kind {
    function name():String;
 }

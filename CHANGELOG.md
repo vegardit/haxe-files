@@ -8,8 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- support eval target
+
 ### Changed
 - minimum required Haxe version is now 4.x
+- removed support for old PHP5 target
+
 
 ## [1.2.1] - 2019-06-02
 

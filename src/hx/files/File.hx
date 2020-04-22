@@ -42,12 +42,12 @@ class File {
    }
 
 
-   public var path(default, null):Path;
+   public final path:Path;
 
 
    inline
    function new(path:Path) {
-       this.path = path;
+      this.path = path;
    }
 
    #if (filesystem_support || macro)
@@ -72,9 +72,7 @@ class File {
    public function openOutput(mode:FileWriteMode, binary = true):FileOutput
       return switch(mode) {
          case REPLACE: sys.io.File.write(toString(), binary);
-         #if (haxe_ver >= 4.0)
          case UPDATE:  sys.io.File.update(toString(), binary);
-         #end
          case APPEND:  sys.io.File.append(toString(), binary);
       }
    #end
@@ -247,7 +245,7 @@ class File {
          }
       }
 
-      var targetPath:Path = switch(newPath.value) {
+      final targetPath:Path = switch(newPath.value) {
          case a(str): Path.of(str, trimWhiteSpaces);
          case b(obj): obj;
       }
@@ -258,7 +256,7 @@ class File {
       if (path.getAbsolutePath() == targetPath.getAbsolutePath())
          return this;
 
-      var targetFile = targetPath.toFile();
+      final targetFile = targetPath.toFile();
 
       if (targetPath.exists()) {
          if (!overwrite)
@@ -315,7 +313,7 @@ class File {
          }
       }
 
-      var targetPath:Path = switch(newPath.value) {
+      final targetPath:Path = switch(newPath.value) {
          case a(str): Path.of(str, trimWhiteSpaces);
          case b(obj): obj;
       }
@@ -323,7 +321,7 @@ class File {
       if (targetPath.filename == "")
          throw "[newPath] must not be null or empty!";
 
-      var targetFile = targetPath.toFile();
+      final targetFile = targetPath.toFile();
 
       if (targetPath.exists()) {
 
@@ -400,7 +398,7 @@ class File {
          throw '[path] "$path" doesn\'t exists!';
 
       #if (sys || macro || nodejs)
-         var stat = sys.FileSystem.stat(path.toString());
+         final stat = sys.FileSystem.stat(path.toString());
          return stat.size;
       #elseif phantomjs
          return js.phantomjs.FileSystem.size(path.toString());
@@ -424,7 +422,6 @@ class File {
       assertValidPath(false);
 
       #if (sys || macro || nodejs)
-         var exists = path.exists();
          if (path.exists()) {
             if (hx.strings.internal.OS.isWindows) {
                Sys.command('copy /b "${path.toString()}"+,,'); // https://superuser.com/a/764721
@@ -503,9 +500,7 @@ class File {
 
 enum FileWriteMode {
    REPLACE;
-   #if (haxe_ver >= 4.0)
    UPDATE;
-   #end
    APPEND;
 }
 
@@ -525,7 +520,7 @@ enum FileCopyOption {
    OVERWRITE;
 
    /**
-    * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+    * If `newPath` is a string do not automatically remove leading/trailing whitespaces of path elements
     */
    NO_WHITESPACE_TRIMMING;
 }
@@ -538,7 +533,7 @@ enum FileMoveOption {
    OVERWRITE;
 
    /**
-    * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+    * If `newPath` is a string do not automatically remove leading/trailing whitespaces of path elements
     */
    NO_WHITESPACE_TRIMMING;
 }

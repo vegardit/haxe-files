@@ -1,6 +1,6 @@
 # haxe-files - cross-platform filesystem operations
 
-[![Build Status](https://travis-ci.org/vegardit/haxe-files.svg?branch=master)](https://travis-ci.org/vegardit/haxe-files)
+[![Build Status](https://travis-ci.com/vegardit/haxe-files.svg?branch=master)](https://travis-ci.com/vegardit/haxe-files)
 [![Release](https://img.shields.io/github/release/vegardit/haxe-files.svg)](http://lib.haxe.org/p/haxe-files)
 [![License](https://img.shields.io/github/license/vegardit/haxe-files.svg?label=license)](#license)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
@@ -22,8 +22,8 @@ A [haxelib](http://lib.haxe.org/documentation/using-haxelib/) for consistent cro
 
 All classes are located in the package `hx.files` or below.,
 
-The library has been extensively unit tested (over 500 individual test cases) on the targets C++, C#, HashLink, Java, JavaScript (Node.js and PhantomJS),
-Neko, PHP 5, PHP 7 and Python 3.
+The library has been extensively unit tested (over 500 individual test cases) on the targets C++, C#, [Eval](https://haxe.org/blog/eval/), ~~Flash~~, [HashLink](https://hashlink.haxe.org/),
+Java, JavaScript ([Node.js](https://nodejs.org) and PhantomJS), Lua, [Neko](https://nekovm.org/), [PHP](https://www.php.net/) 7 and [Python](https://www.python.org/) 3.
 
 Requires Haxe 3.4 or higher.
 
@@ -198,7 +198,7 @@ Implementations of the [hx.files.watcher.FileWatcher](https://github.com/vegardi
 interface allow you to monitor the file system for create/delete/change events.
 
 The [hx.files.watcher.PollingFileWatcher](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/watcher/PollingFileWatcher.hx) class
-scans the file system in intervalls to recursively determine file changes. This is a rather inefficient way but works cross-target.
+scans the file system in intervals to recursively determine file changes. This is a rather inefficient way but works cross-target.
 
 With Java7 or higher the [hx.files.watcher.JavaFileWatcher](https://github.com/vegardit/haxe-files/blob/master/src/hx/files/watcher/JavaFileWatcher.hx)
 based on [WatcherService](https://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html) is available.

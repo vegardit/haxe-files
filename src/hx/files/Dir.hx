@@ -71,21 +71,19 @@ class Dir {
          return Dir.of(python.lib.os.Path.expanduser("~"));
       #elseif (phantomjs && !macro)
          untyped __js__("var system = require('system');");
-         if (hx.strings.internal.OS.isWindows) {
+         if (hx.strings.internal.OS.isWindows)
             return Dir.of("" + untyped __js__("system.env['HOMEDRIVE']") + untyped __js__("system.env['HOMEPATH']"));
-         }
          return Dir.of("" + untyped __js__("system.env['HOME']"));
       #elseif (sys || nodejs)
-         if (hx.strings.internal.OS.isWindows) {
+         if (hx.strings.internal.OS.isWindows)
             return Dir.of(Sys.getEnv("HOMEDRIVE") + Sys.getEnv("HOMEPATH"));
-         }
          return Dir.of(Sys.getEnv("HOME"));
       #else
          throw "Operation not supported on current target.";
       #end
    }
 
-   #end // filesystem_support
+   #end // (filesystem_support || macro)
 
    /**
     * This method does not check if the path actually exists and if it currently points to a directory or a file
@@ -103,7 +101,7 @@ class Dir {
    }
 
 
-   public var path(default, null):Path;
+   public final path:Path;
 
 
    inline
@@ -147,8 +145,8 @@ class Dir {
 
       #if lua
          // workaround for https://github.com/HaxeFoundation/haxe/issues/6946
-         var parts = [ path ];
-         var _p = path;
+         final parts = [ path ];
+         final _p = path;
          while ((_p = _p.parent) != null) {
             if (_p.isRoot)
                break;
@@ -173,7 +171,7 @@ class Dir {
 
 
    /**
-    * Recursviely copies the given directory.
+    * Recursively copies the given directory.
     *
     * <pre><code>
     * >>> Dir.of("target/copyA/11").create()            throws nothing
@@ -200,8 +198,8 @@ class Dir {
       var trimWhiteSpaces = true;
       var overwrite = false;
       var merge = false;
-      var onFile:File -> File -> Void = null;
-      var onDir:Dir -> Dir -> Void = null;
+      var onFile:(File, File) -> Void = null;
+      var onDir:(Dir, Dir) -> Void = null;
 
       if (options != null) for (o in options) {
          switch(o) {
@@ -212,7 +210,7 @@ class Dir {
          }
       }
 
-      var targetPath:Path = switch(newPath.value) {
+      final targetPath:Path = switch(newPath.value) {
          case a(str): Path.of(str, trimWhiteSpaces);
          case b(obj): obj;
       }
@@ -223,7 +221,7 @@ class Dir {
       if (path.getAbsolutePath() == targetPath.getAbsolutePath())
          return this;
 
-      var targetDir = targetPath.toDir();
+      final targetDir = targetPath.toDir();
 
       if (targetPath.exists()) {
          if (!overwrite && !merge)
@@ -243,16 +241,16 @@ class Dir {
                return targetDir;
             }
          #end
-         var sourcPathLen = toString().length;
+         final sourcPathLen = toString().length;
          targetDir.create();
          walk(
             function(file) {
-               var targetDirFile = targetDir.path.join(file.path.toString().substr(sourcPathLen)).toFile();
+               final targetDirFile = targetDir.path.join(file.path.toString().substr(sourcPathLen)).toFile();
                file.copyTo(targetDirFile.path, merge ? [OVERWRITE] : null);
                if (onFile != null) onFile(file, targetDirFile);
             },
             function(dir) {
-               var targetDirDir = targetDir.path.join(dir.path.toString().substr(sourcPathLen)).toDir();
+               final targetDirDir = targetDir.path.join(dir.path.toString().substr(sourcPathLen)).toDir();
                targetDirDir.create();
                if (onDir != null) onDir(dir, targetDirDir);
                return true;
@@ -314,7 +312,7 @@ class Dir {
       #if (phantomjs && !macro)
          js.phantomjs.FileSystem.removeTree(path.toString());
       #elseif (sys || nodejs)
-         var dirs:Array<Dir> = [];
+         final dirs:Array<Dir> = [];
          walk(
             function(file) file.delete(),
             function(dir) { dirs.push(dir); return true; }
@@ -341,10 +339,10 @@ class Dir {
 
       assertValidPath();
 
-      var p = path.toString();
-      var searchRootPath = p + globPattern.substringBefore("*").substringBeforeLast("/");
-      var filePattern = GlobPatterns.toEReg(globPattern);
-      var searchRootOffset = p.endsWith(path.dirSep) ? p.length8() : p.length8() + 1;
+      final p = path.toString();
+      final searchRootPath = p + globPattern.substringBefore("*").substringBeforeLast("/");
+      final filePattern = GlobPatterns.toEReg(globPattern);
+      final searchRootOffset = p.endsWith(path.dirSep) ? p.length8() : p.length8() + 1;
 
       Dir.of(searchRootPath).walk(
          function(file) {
@@ -377,7 +375,7 @@ class Dir {
     * </code></pre>
     */
    public function findDirs(globPattern:String):Array<Dir> {
-      var dirs = new Array<Dir>();
+      final dirs = new Array<Dir>();
       find(globPattern, null, function(dir) dirs.push(dir));
       return dirs;
    }
@@ -398,7 +396,7 @@ class Dir {
     * </code></pre>
     */
    public function findFiles(globPattern:String):Array<File> {
-      var files = new Array<File>();
+      final files = new Array<File>();
       find(globPattern, function(file) files.push(file), null);
       return files;
    }
@@ -425,9 +423,9 @@ class Dir {
       var entries:Array<String>;
 
       #if (sys || macro || nodejs)
-         var entries = FileSystem.readDirectory(path.toString());
+         entries = FileSystem.readDirectory(path.toString());
       #elseif phantomjs
-         var entries = [for (entry in js.phantomjs.FileSystem.list(path.toString())) if (entry != "." && entry != "..") entry];
+         entries = [for (entry in js.phantomjs.FileSystem.list(path.toString())) if (entry != "." && entry != "..") entry];
       #else
          throw "Operation not supported on current target.";
       #end
@@ -501,7 +499,7 @@ class Dir {
          }
       }
 
-      var targetPath:Path = switch(newPath.value) {
+      final targetPath:Path = switch(newPath.value) {
          case a(str): Path.of(str, trimWhiteSpaces);
          case b(obj): obj;
       }
@@ -509,7 +507,7 @@ class Dir {
       if (targetPath.filename == "")
          throw "[newPath] must not be null or empty!";
 
-      var targetDir = targetPath.toDir();
+      final targetDir = targetPath.toDir();
 
       if (targetPath.exists()) {
 
@@ -610,9 +608,7 @@ class Dir {
          throw '[path] "$path" doesn\'t exists!';
 
       var size:Int = 0;
-      walk(function(file:File) {
-         size += file.size();
-      });
+      walk((file) -> size += file.size());
       return size;
    }
 
@@ -661,7 +657,7 @@ enum DirRenameOption {
 
 enum DirCopyOption {
    /**
-    * If MERGE is not specified, delete the targt directory prio copying if it exists already.
+    * If MERGE is not specified, delete the target directory prio copying if it exists already.
     * If MERGE is specified, overwrite existing files in the target directory otherwise skip the respective source files.
     */
    OVERWRITE;
@@ -669,11 +665,11 @@ enum DirCopyOption {
    MERGE;
 
    /**
-    * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+    * If `newPath` is a string do not automatically remove leading/trailing whitespaces of path elements
     */
    NO_WHITESPACE_TRIMMING;
 
-   LISTENER(onFile:File -> File -> Void, ?onDir:Dir -> Dir -> Void);
+   LISTENER(onFile:(File, File) -> Void, ?onDir:(Dir, Dir) -> Void);
 }
 
 
@@ -684,7 +680,7 @@ enum DirMoveOption {
    OVERWRITE;
 
    /**
-    * If `newPath` is a string do not automatcially remove leading/trailing whitespaces of path elements
+    * If `newPath` is a string do not automatically remove leading/trailing whitespaces of path elements
     */
    NO_WHITESPACE_TRIMMING;
 }

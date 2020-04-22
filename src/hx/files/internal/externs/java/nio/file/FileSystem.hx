@@ -6,5 +6,5 @@ extern class FileSystem {
    @:throws("java.io.IOException")
    public function newWatchService():WatchService;
 
-   public function getPath(path:String):Path;
+   public function getPath(path:String, more:java.NativeArray<String>):Path;
 }

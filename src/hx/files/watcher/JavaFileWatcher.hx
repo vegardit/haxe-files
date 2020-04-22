@@ -40,8 +40,8 @@ class JavaFileWatcher extends AbstractFileWatcher {
 
    var pollTask:TaskFuture<Void> = null;
 
-   var watched = new StringMap<WatchEntry>();
-   var watchedSync = new RLock();
+   final watched = new StringMap<WatchEntry>();
+   final watchedSync = new RLock();
 
    var watchService:WatchService;
 
@@ -80,11 +80,11 @@ class JavaFileWatcher extends AbstractFileWatcher {
    function pollEvents() {
       watchedSync.execute(function() {
          for (entry in watched) {
-            var events = entry.watchKey.pollEvents().iterator();
+            final events = entry.watchKey.pollEvents().iterator();
             while (events.hasNext()) {
-               var event:WatchEvent = events.next();
-               var relPath = Std.string(event.context());
-               var path = entry.path.join(relPath);
+               final event:WatchEvent = events.next();
+               final relPath = Std.string(event.context());
+               final path = entry.path.join(relPath);
                switch(event.kind().name()) {
                   case "ENTRY_CREATE":
                      if (path.isDirectory()) {
@@ -108,7 +108,7 @@ class JavaFileWatcher extends AbstractFileWatcher {
                      }
                   }
                   default:
-                      trace("Unexpected WatchEvent type: " + event.kind().name());
+                      trace('[ERROR] Unexpected WatchEvent type: ${event.kind().name()}');
                }
             }
          }
@@ -124,21 +124,21 @@ class JavaFileWatcher extends AbstractFileWatcher {
       if (path == null)
          throw "[path] must not be null";
 
-      var pathObj:Path = (switch(path.value) {
+      final pathObj:Path = (switch(path.value) {
          case a(obj): obj;
          case b(str): Path.of(str);
       }).normalize();
 
-      trace('Watching [$pathObj]...');
+      trace('[INFO] Watching [$pathObj]...');
       watchedSync.execute(function() {
-         var pathStr = pathObj.toString();
+         final pathStr = pathObj.toString();
 
          if (watched.exists(pathStr))
             return;
 
-         var entry = new WatchEntry();
+         final entry = new WatchEntry();
          entry.path = pathObj;
-         entry.jpath = FileSystems.getDefault().getPath(pathStr);
+         entry.jpath = FileSystems.getDefault().getPath(pathStr, new java.NativeArray(0));
          entry.collectExistingDirs();
          entry.watchKey = createWatchKey(entry.jpath);
          watched.set(pathStr, entry);
@@ -147,17 +147,17 @@ class JavaFileWatcher extends AbstractFileWatcher {
 
 
    private function createWatchKey(jpath:JPath):WatchKey {
-      var kinds = new java.NativeArray(3);
+      final kinds = new java.NativeArray<WatchEvent_Kind>(3);
       kinds[0] = StandardWatchEventKinds.ENTRY_CREATE;
       kinds[1] = StandardWatchEventKinds.ENTRY_MODIFY;
       kinds[2] = StandardWatchEventKinds.ENTRY_DELETE;
 
       if (OS.isWindows) {
-         var opts = new java.NativeArray<WatchEvent_Modifier>(1);
+         final opts = new java.NativeArray<WatchEvent_Modifier>(1);
          opts[0] = ExtendedWatchEventModifier.FILE_TREE;
          return jpath.register(watchService, kinds, opts);
       }
-       return jpath.register(watchService, kinds, new java.NativeArray(0));
+      return jpath.register(watchService, kinds, new java.NativeArray<WatchEvent_Modifier>(0));
    }
 
 
@@ -167,15 +167,15 @@ class JavaFileWatcher extends AbstractFileWatcher {
          return;
 
       watchedSync.execute(function() {
-         var pathStr = (
+         final pathStr = (
             switch(path.value) {
                case a(obj): obj;
                case b(str): Path.of(str);
             }
          ).normalize().toString();
 
-         trace('Unwatching [$pathStr]...');
-         var entry = watched.get(pathStr);
+         trace('[INFO] Unwatching [$pathStr]...');
+         final entry = watched.get(pathStr);
          if (entry == null)
             return;
 
@@ -187,19 +187,23 @@ class JavaFileWatcher extends AbstractFileWatcher {
 
 
 private class WatchEntry {
-   public function new() {};
-   public var watchKey:WatchKey;
+
+   public final existingDirs = new StringArray();
+
    public var jpath:JPath;
    public var path:Path;
+   public var watchKey:WatchKey;
 
-   public var existingDirs = new StringArray();
+   inline
+   public function new() {
+   };
 
    public function collectExistingDirs() {
       // workaround for https://stackoverflow.com/questions/13924754/determining-type-of-deleted-file-from-watchevent
       existingDirs.clear();
       if (path.isDirectory()) {
-         var dir = path.toDir();
-         var pathLen = dir.toString().length;
+         final dir = path.toDir();
+         final pathLen = dir.toString().length;
          dir.walk(null, function(dir) {
             existingDirs.push(dir.toString().substring(pathLen));
             return true;

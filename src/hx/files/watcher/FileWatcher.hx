@@ -30,8 +30,8 @@ enum FileSystemEvent {
    DIR_DELETED(dir:Dir);
 
    /**
-    * @param old attributes at the time before the event occured, may be null depending on implementation
-    * @param now attributes at the time when the event occured, may be null depending on implementation
+    * @param old attributes at the time before the event occurred, may be null depending on implementation
+    * @param now attributes at the time when the event occurred, may be null depending on implementation
     */
    DIR_MODIFIED(dir:Dir, old:DirAttrs, now:DirAttrs);
 
@@ -40,8 +40,8 @@ enum FileSystemEvent {
    FILE_DELETED(file:File);
 
    /**
-    * @param old attributes at the time before the event occured, may be null depending on implementation
-    * @param now attributes at the time when the event occured, may be null depending on implementation
+    * @param old attributes at the time before the event occurred, may be null depending on implementation
+    * @param now attributes at the time when the event occurred, may be null depending on implementation
     */
    FILE_MODIFIED(file:File, old:FileAttrs, now:FileAttrs);
 }
@@ -49,15 +49,15 @@ enum FileSystemEvent {
 
 @immutable
 class DirAttrs {
-   public var mtime(default, null):Float;
-   public var uid(default, null):Int;
-   public var gid(default, null):Int;
-   public var mode(default, null):Int;
+   public final mtime:Float;
+   public final uid:Int;
+   public final gid:Int;
+   public final mode:Int;
 
    inline
    public static function fromDir(dir:Dir) {
       #if (sys || macro || nodejs)
-         var stat = dir.path.stat();
+         final stat = dir.path.stat();
          return new DirAttrs(dir.path.getModificationTime(), stat.uid, stat.gid, stat.mode);
       #else
          return new DirAttrs(dir.path.getModificationTime(), -1, -1, -1);
@@ -81,16 +81,16 @@ class DirAttrs {
 
 @immutable
 class FileAttrs {
-   public var mtime(default, null):Float;
-   public var uid(default, null):Int;
-   public var gid(default, null):Int;
-   public var mode(default, null):Int;
-   public var size(default, null):Int;
+   public final mtime:Float;
+   public final uid:Int;
+   public final gid:Int;
+   public final mode:Int;
+   public final size:Int;
 
    inline
    public static function fromFile(file:File) {
       #if (sys || macro || nodejs)
-         var stat = file.path.stat();
+         final stat = file.path.stat();
          return new FileAttrs(file.path.getModificationTime(), stat.uid, stat.gid, stat.mode, stat.size);
       #else
          return new FileAttrs(file.path.getModificationTime(), -1, -1, -1, file.size());
@@ -115,8 +115,8 @@ class FileAttrs {
 @:abstract
 class AbstractFileWatcher extends ServiceBase implements EventListenable<FileSystemEvent> implements FileWatcher {
 
-   var executor:Executor;
-   var eventDispatcher:EventDispatcher<FileSystemEvent>;
+   final executor:Executor;
+   final eventDispatcher:EventDispatcher<FileSystemEvent>;
 
 
    public function new(executor:Executor) {

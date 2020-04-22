@@ -20,12 +20,12 @@ import hx.strings.internal.Either2;
  */
 class PollingFileWatcher extends AbstractFileWatcher {
 
-   var intervalMS:Int;
+   final intervalMS:Int;
 
    var scanTask:TaskFuture<Void> = null;
 
-   var watched = new StringMap<FSEntry>();
-   var watchedSync = new RLock();
+   final watched = new StringMap<FSEntry>();
+   final watchedSync = new RLock();
 
    /**
      * @param executor the executor to be used for scheduling/executing the background polling task and for notifying subscribers of FileSystemEvents (optional, defaults to hx.concurrent.event.SyncEventDispatcher)
@@ -62,14 +62,14 @@ class PollingFileWatcher extends AbstractFileWatcher {
       if (path == null)
          throw "[path] must not be null";
 
-      var pathObj:Path = (switch(path.value) {
+      final pathObj:Path = (switch(path.value) {
          case a(obj): obj;
          case b(str): Path.of(str);
       }).normalize();
 
-      trace('Watching [$pathObj]...');
+      trace('[INFO] Watching [$pathObj]...');
       watchedSync.execute(function() {
-         var pathStr = pathObj.toString();
+         final pathStr = pathObj.toString();
          if (watched.exists(pathStr))
             return;
 
@@ -87,27 +87,27 @@ class PollingFileWatcher extends AbstractFileWatcher {
          return;
 
       watchedSync.execute(function() {
-         var pathStr = (
+         final pathStr = (
             switch(path.value) {
                case a(obj): obj;
                case b(str): Path.of(str);
             }
          ).normalize().toString();
 
-         trace('Unwatching [$pathStr]...');
+         trace('[INFO] Unwatching [$pathStr]...');
          watched.remove(pathStr);
       });
    }
 
 
    private function scanAll():Void {
-      var paths:StringArray = watchedSync.execute(function() {
+      final paths:StringArray = watchedSync.execute(function() {
          return [ for (k in watched.keys()) k ];
       });
 
       for (path in paths) {
          watchedSync.execute(function() {
-            var fsEntry = watched.get(path);
+            final fsEntry = watched.get(path);
             if (fsEntry == null) // if null, then the path has been unwachted in the meantime
                return;
             scanPath(fsEntry);
@@ -125,7 +125,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
                      eventDispatcher.fire(FileSystemEvent.DIR_MODIFIED(dir, attrs, attrsNow));
 
                   for (childName in children.keys()) {
-                     var child = children.get(childName);
+                     final child = children.get(childName);
                      var childNow = childrenNow.get(childName);
 
                      if (childNow == null)
@@ -134,9 +134,9 @@ class PollingFileWatcher extends AbstractFileWatcher {
                   }
 
                   for (childName in childrenNow.keys()) {
-                     var child = children.get(childName);
+                     final child = children.get(childName);
                      if (child == null) {
-                        var childNow = childrenNow.get(childName);
+                        final childNow = childrenNow.get(childName);
                         compareFSEntry(FSEntry.NONEXISTANT(null), childNow);
                      }
                   }
@@ -167,7 +167,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
             switch(now) {
                case DIR(dir, _, children):
                   eventDispatcher.fire(FileSystemEvent.DIR_CREATED(dir));
-                  var work = [ children ];
+                  final work = [ children ];
                   while((children = work.pop()) != null) {
                      for (child in children) {
                         switch(child) {
@@ -195,13 +195,13 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
       switch(fsEntry) {
          case DIR(dir, attrs, children): {
-            var fsEntryNow = dir.path.exists() ? createFSEntry_DIR(dir) : FSEntry.NONEXISTANT(dir.path);
+            final fsEntryNow = dir.path.exists() ? createFSEntry_DIR(dir) : FSEntry.NONEXISTANT(dir.path);
             compareFSEntry(fsEntry, fsEntryNow);
             watched.set(dir.path.toString(), fsEntryNow);
          }
 
          case FILE(file, attrs): {
-            var fsEntryNow = file.path.exists() ? createFSEntry_FILE(file) : FSEntry.NONEXISTANT(file.path);
+            final fsEntryNow = file.path.exists() ? createFSEntry_FILE(file) : FSEntry.NONEXISTANT(file.path);
             compareFSEntry(fsEntry, fsEntryNow);
             watched.set(file.path.toString(), fsEntryNow);
          }
@@ -211,15 +211,15 @@ class PollingFileWatcher extends AbstractFileWatcher {
                 return;
 
             if (path.isDirectory()) {
-               var fsEntryNow = createFSEntry_DIR(path.toDir());
+               final fsEntryNow = createFSEntry_DIR(path.toDir());
                compareFSEntry(fsEntry, fsEntryNow);
                watched.set(path.toString(), fsEntryNow);
             } else if (path.isFile()) {
-               var fsEntryNow = createFSEntry_FILE(path.toFile());
+               final fsEntryNow = createFSEntry_FILE(path.toFile());
                compareFSEntry(fsEntry, fsEntryNow);
                watched.set(path.toString(), fsEntryNow);
             } else {
-               trace('WARN: Filesystem object at [$path] is of unknown type.');
+               trace('[WARN] Filesystem object at [$path] is of unknown type.');
             }
          }
 
@@ -252,7 +252,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
    private function createFSEntry_DIR(dir:Dir):FSEntry {
 
-      var children = new SortedStringMap<FSEntry>();
+      final children = new SortedStringMap<FSEntry>();
 
       for (path in dir.list()) {
          if (path.isDirectory()) {
@@ -260,7 +260,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
          } else if (path.isFile()) {
             children.set(path.filename, createFSEntry_FILE(path.toFile()));
          } else {
-            trace('WARN: Filesystem object at [$path] is of unknown type.');
+            trace('[WARN] Filesystem object at [$path] is of unknown type.');
          }
       }
 
