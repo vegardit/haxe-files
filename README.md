@@ -22,7 +22,7 @@ A [haxelib](http://lib.haxe.org/documentation/using-haxelib/) for consistent cro
 
 All classes are located in the package `hx.files` or below.,
 
-The library has been extensively unit tested (over 500 individual test cases) on the targets C++, C#, [Eval](https://haxe.org/blog/eval/), ~~Flash~~, [HashLink](https://hashlink.haxe.org/),
+The library has been extensively unit tested (over 500 individual test cases) on the targets C++, C#, [Eval](https://haxe.org/blog/eval/), [HashLink](https://hashlink.haxe.org/),
 Java, JavaScript ([Node.js](https://nodejs.org) and PhantomJS), Lua, [Neko](https://nekovm.org/), [PHP](https://www.php.net/) 7 and [Python](https://www.python.org/) 3.
 
 Requires Haxe 3.4 or higher.
@@ -31,6 +31,13 @@ Requires Haxe 3.4 or higher.
 * When targeting [Node.js](https://nodejs.org) the [hxnodejs](https://lib.haxe.org/p/hxnodejs) haxelib is required.
 * When targeting [PhantomJS](https://phantomjs.org) the [phantomjs](https://lib.haxe.org/p/phantomjs) haxelib is required.
 * Flash/Air is currently not supported.
+
+### Haxe compatiblity
+
+|haxe-strings    |Haxe           |
+|----------------|---------------|
+|1.0.0 to 1.2.1  |3.4.2 or higher|
+|2.0.0 or higher |4.0.5 or higher|
 
 
 ## <a name="path-class"></a>The `Path` class
