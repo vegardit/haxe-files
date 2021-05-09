@@ -111,7 +111,7 @@ jobs:
       run: haxelib run travix cs
 
     - name: Test [eval]
-      if: runner.os == 'macOS' # hangs on Linux/Windows for unknown reason
+      continue-on-error: ${{ runner.os != 'macOS' }} # hangs on Linux/Windows for unknown reason
       run: haxelib run travix interp -D eval-stack
 
     - name: Test [flash]
