@@ -1,6 +1,6 @@
 # haxe-files - cross-platform filesystem operations
 
-[![Build Status](https://travis-ci.com/vegardit/haxe-files.svg?branch=master)](https://travis-ci.com/vegardit/haxe-files)
+[![Build Status](https://github.com/vegardit/haxe-files/workflows/Build/badge.svg "GitHub Actions")](https://github.com/vegardit/haxe-files/actions?query=workflow%3A%22Build%22)
 [![Release](https://img.shields.io/github/release/vegardit/haxe-files.svg)](http://lib.haxe.org/p/haxe-files)
 [![License](https://img.shields.io/github/license/vegardit/haxe-files.svg?label=license)](#license)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
