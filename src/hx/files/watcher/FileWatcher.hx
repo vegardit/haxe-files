@@ -54,11 +54,12 @@ class DirAttrs {
    public final gid:Int;
    public final mode:Int;
 
-   inline
    public static function fromDir(dir:Dir) {
       #if (sys || macro || nodejs)
          final stat = dir.path.stat();
-         return new DirAttrs(dir.path.getModificationTime(), stat.uid, stat.gid, stat.mode);
+         return stat == null
+            ? new DirAttrs(dir.path.getModificationTime(), -1, -1, -1)
+            : new DirAttrs(dir.path.getModificationTime(), stat.uid, stat.gid, stat.mode);
       #else
          return new DirAttrs(dir.path.getModificationTime(), -1, -1, -1);
       #end
@@ -87,11 +88,12 @@ class FileAttrs {
    public final mode:Int;
    public final size:Int;
 
-   inline
    public static function fromFile(file:File) {
       #if (sys || macro || nodejs)
          final stat = file.path.stat();
-         return new FileAttrs(file.path.getModificationTime(), stat.uid, stat.gid, stat.mode, stat.size);
+         return stat == null
+            ? new FileAttrs(file.path.getModificationTime(), -1, -1, -1, file.size())
+            : new FileAttrs(file.path.getModificationTime(), stat.uid, stat.gid, stat.mode, stat.size);
       #else
          return new FileAttrs(file.path.getModificationTime(), -1, -1, -1, file.size());
       #end

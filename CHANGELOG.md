@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- NPE in FileWatcher in case of very fast file operations (create/delete)
+
 
 ## [2.0.0] - 2020-04-22
 
