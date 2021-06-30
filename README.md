@@ -58,9 +58,9 @@ import hx.files.*;
 class MyClass {
 
    static function main() {
-      var p = Path.of("./mydir/myfile.txt");   // constructing a path compatible with the local operating/file-system
-      var p = Path.unix("/mydir/myfile.txt");     // constructing a Unix-style path
-      var p = Path.win("C:\\mydir\\myfile.txt"); // constructing a Windows-style path
+      var p = Path.of("./mydir/myfile.txt");     // constructs a path compatible with the local operating/file-system
+      var p = Path.unix("/mydir/myfile.txt");    // constructs a Unix-style path
+      var p = Path.win("C:\\mydir\\myfile.txt"); // constructs a Windows-style path
 
       p.filename;      // returns "myfile.txt"
       p.filenameExt;   // returns "txt"
@@ -108,14 +108,14 @@ class MyClass {
       var f = Path.of("mydir/myfile.txt").toFile(); // converting a Path instance to a File instance
       var f = File.of("mydir/myfile.txt");          // creating a File instance from a String path
 
-      f.touch();                // create an empty file or update the modification timestamp
-      f.writeString("Hello ");  // sets the file's content
+      f.touch();               // create an empty file or update the modification timestamp
+      f.writeString("Hello "); // sets the file's content
       f.appendString("world!");
 
       f.size(); // returns the file size
 
-      f.copyTo("mydir/myfile2.txt");               // throws an exception if myfile2.txt exists already
-      f.copyTo("mydir/myfile2.txt", [OVERWRITE]);  // replaces myfile2.txt if it exists already
+      f.copyTo("mydir/myfile2.txt");              // throws an exception if myfile2.txt exists already
+      f.copyTo("mydir/myfile2.txt", [OVERWRITE]); // replaces myfile2.txt if it exists already
 
       f.delete();  // deletes the file
 
@@ -184,11 +184,11 @@ import hx.files.*;
 class MyClass {
 
    static function main() {
-      GlobPatterns.toRegEx("*.txt");       // returns == "^[^\\\\^\\/]*\\.txt$"
-      GlobPatterns.toRegEx("*file*");      // returns "^[^\\\\^\\/]*file[^\\\\^\\/]*$"
-      GlobPatterns.toRegEx("file?.txt");   // returns "^file[^\\\\^\\/]\\.txt$"
-      GlobPatterns.toRegEx("file[A-Z]");   // returns "^file[A-Z]$"
-      GlobPatterns.toRegEx("file[!A-Z]");  // returns "^file[^A-Z]$"
+      GlobPatterns.toRegEx("*.txt");      // returns == "^[^\\\\^\\/]*\\.txt$"
+      GlobPatterns.toRegEx("*file*");     // returns "^[^\\\\^\\/]*file[^\\\\^\\/]*$"
+      GlobPatterns.toRegEx("file?.txt");  // returns "^file[^\\\\^\\/]\\.txt$"
+      GlobPatterns.toRegEx("file[A-Z]");  // returns "^file[A-Z]$"
+      GlobPatterns.toRegEx("file[!A-Z]"); // returns "^file[^A-Z]$"
 
       GlobPatterns.toEreg("src/**/*.hx").match("src/haxe/strings/Char.hx");            // returns true
       GlobPatterns.toEreg("assets/**/*.{js,css}").match("assets/theme/dark/dark.css"); // returns true
