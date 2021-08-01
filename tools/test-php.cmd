@@ -3,13 +3,13 @@ REM Copyright (c) 2016-2021 Vegard IT GmbH (https://vegardit.com) and contributo
 REM SPDX-License-Identifier: Apache-2.0
 REM Author: Sebastian Thomschke, Vegard IT GmbH
 
-call %~dp0_test-prepare.cmd js phantomjs
+call %~dp0_test-prepare.cmd php
 
 echo Compiling...
-haxe %~dp0..\tests.hxml -js target\js\TestRunner.js
+haxe %~dp0..\tests.hxml -php target\php
 set rc=%errorlevel%
 popd
 if not %rc% == 0 exit /b %rc%
 
-echo Testing [Execution in WegPage Context]...
-phantomjs "%~dp0phantomJS\phantom.js"
+echo Testing...
+%PHP7_HOME%\php "%~dp0..\target\php\index.php"
