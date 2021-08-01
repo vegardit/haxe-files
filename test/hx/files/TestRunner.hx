@@ -120,11 +120,11 @@ class TestRunner extends DocTestRunner {
        _later( 600, function() { file.appendString("456");   trace("-> append: "  + file ); });
        _later(1800, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
        _later(2000, function() { file.delete();              trace("-> delete: "  + file ); });
-       _later(2200, function() {
+       _later(3000, function() {
            fw.stop();
            ex.stop();
-
            assertInRange(events.length, 4, 5);
+
            assertTrue(switch(events[0]) { case FILE_CREATED(_):  true; default: false; });
            if (events.length == 4) {
                assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
