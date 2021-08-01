@@ -20,12 +20,10 @@
 
 A [haxelib](http://lib.haxe.org/documentation/using-haxelib/) for consistent cross-platform filesystem operations and proper Windows-/Unix-style path handling.
 
-All classes are located in the package `hx.files` or below.,
+All classes are located in the package `hx.files` or below.
 
 The library has been extensively unit tested (over 500 individual test cases) on the targets C++, C#, [Eval](https://haxe.org/blog/eval/), [HashLink](https://hashlink.haxe.org/),
 Java, JavaScript ([Node.js](https://nodejs.org) and PhantomJS), Lua, [Neko](https://nekovm.org/), [PHP](https://www.php.net/) 7 and [Python](https://www.python.org/) 3.
-
-Requires Haxe 3.4 or higher.
 
 **Note:**
 * When targeting [Node.js](https://nodejs.org) the [hxnodejs](https://lib.haxe.org/p/hxnodejs) haxelib is required.
