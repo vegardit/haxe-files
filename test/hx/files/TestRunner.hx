@@ -4,6 +4,7 @@
  */
 package hx.files;
 
+import haxe.EnumTools;
 import hx.concurrent.atomic.AtomicInt;
 import hx.concurrent.executor.Executor;
 import hx.concurrent.internal.Dates;
@@ -45,98 +46,95 @@ class TestRunner extends DocTestRunner {
 
    #if java
    public function testJavaFileWatcher():Void {
-       var ex = Executor.create();
-       var fw = new hx.files.watcher.JavaFileWatcher(ex);
+      var ex = Executor.create();
+      var fw = new hx.files.watcher.JavaFileWatcher(ex);
 
-       var events = new Array<FileSystemEvent>();
-       fw.subscribe(function (event) {
-           var path = switch(event) {
-               case DIR_CREATED(dir): dir.path;
-               case DIR_DELETED(dir): dir.path;
-               case DIR_MODIFIED(dir, _): dir.path;
-               case FILE_CREATED(file): file.path;
-               case FILE_DELETED(file): file.path;
-               case FILE_MODIFIED(file, _): file.path;
-           }
-           trace('EVENT: ${event.getName()}: $path');
-           events.push(event);
-       });
+      var events = new Array<FileSystemEvent>();
+      fw.subscribe(function (event) {
+         var path = switch(event) {
+            case DIR_CREATED(dir): dir.path;
+            case DIR_DELETED(dir): dir.path;
+            case DIR_MODIFIED(dir, _): dir.path;
+            case FILE_CREATED(file): file.path;
+            case FILE_DELETED(file): file.path;
+            case FILE_MODIFIED(file, _): file.path;
+         }
+         trace('EVENT: ${event.getName()}: $path');
+         events.push(event);
+      });
 
-       var dir = Dir.of("target/filewatcher_test");
-       dir.delete(true);
-       dir.create();
+      var dir = Dir.of("target/filewatcher_test");
+      dir.delete(true);
+      dir.create();
 
-       fw.watch(dir.path);
+      fw.watch(dir.path);
 
-       Sys.sleep(0.2); dir.path.join("foo").toDir().create();
-       Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().writeString("123");
-       Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().appendString("456");
-       Sys.sleep(0.2); dir.path.join("foo").toDir().delete(true);
-       Sys.sleep(0.2);
+      Sys.sleep(0.2); dir.path.join("foo").toDir().create();
+      Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().writeString("123");
+      Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().appendString("456");
+      Sys.sleep(0.2); dir.path.join("foo").toDir().delete(true);
+      Sys.sleep(0.2);
 
-       assertMin(events.length, 4);
+      trace(events);
+      assertEquals(Lambda.count(events, e -> e.match(DIR_CREATED(_))), 1);
+      assertEquals(Lambda.count(events, e -> e.match(DIR_DELETED(_))), 1);
+      assertEquals(Lambda.count(events, e -> e.match(FILE_CREATED(_))), 1);
+      assertMin(Lambda.count(events, e -> e.match(FILE_MODIFIED(_))), 2);
+      assertEquals(Lambda.count(events, e -> e.match(FILE_DELETED(_))), 0);
 
-       fw.unwatch(dir.path);
+      fw.unwatch(dir.path);
 
-       events = new Array<FileSystemEvent>();
-       Sys.sleep(0.2); dir.path.join("foo").toDir().create();
-       Sys.sleep(0.2); dir.path.join("test.txt").toFile().writeString("123");
-       Sys.sleep(0.2);
+      events = new Array<FileSystemEvent>();
+      Sys.sleep(0.2); dir.path.join("foo").toDir().create();
+      Sys.sleep(0.2); dir.path.join("test.txt").toFile().writeString("123");
+      Sys.sleep(0.2);
 
-       assertEquals(events.length, 0);
+      assertEquals(events.length, 0);
 
-       fw.stop();
-       ex.stop();
+      fw.stop();
+      ex.stop();
 
-       dir.delete(true);
+      dir.delete(true);
    }
    #end
 
 
    #if filesystem_support
    public function testPollingFileWatcher_SingleFile():Void {
-       var ex = Executor.create();
-       var fw = new PollingFileWatcher(ex, 100);
+      var ex = Executor.create();
+      var fw = new PollingFileWatcher(ex, 100);
 
-       var events = new Array<FileSystemEvent>();
-       fw.subscribe(function (event) {
-           var path = switch(event) {
-               case DIR_CREATED(dir): dir.path;
-               case DIR_DELETED(dir): dir.path;
-               case DIR_MODIFIED(dir, _): dir.path;
-               case FILE_CREATED(file): file.path;
-               case FILE_DELETED(file): file.path;
-               case FILE_MODIFIED(file, _): file.path;
-           }
-           trace('EVENT: ${event.getName()}: $path');
-           events.push(event);
-       });
+      var events = new Array<FileSystemEvent>();
+      fw.subscribe(function (event) {
+         var path = switch(event) {
+            case DIR_CREATED(dir): dir.path;
+            case DIR_DELETED(dir): dir.path;
+            case DIR_MODIFIED(dir, _): dir.path;
+            case FILE_CREATED(file): file.path;
+            case FILE_DELETED(file): file.path;
+            case FILE_MODIFIED(file, _): file.path;
+         }
+         trace('EVENT: ${event.getName()}: $path');
+         events.push(event);
+      });
 
-       var file = File.of("target/filewatcher_test.txt");
-       file.delete();
-       fw.watch(file.path);
+      var file = File.of("target/filewatcher_test.txt");
+      file.delete();
+      fw.watch(file.path);
 
-       _later( 100, function() { file.writeString("123");    trace("-> create: "  + file ); });
-       _later( 600, function() { file.appendString("456");   trace("-> append: "  + file ); });
-       _later(1800, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
-       _later(2000, function() { file.delete();              trace("-> delete: "  + file ); });
-       _later(3000, function() {
-           fw.stop();
-           ex.stop();
-           assertInRange(events.length, 4, 5);
+      _later( 100, function() { file.writeString("123");    trace("-> create: "  + file ); });
+      _later( 600, function() { file.appendString("456");   trace("-> append: "  + file ); });
+      _later(1800, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
+      _later(2000, function() { file.delete();              trace("-> delete: "  + file ); });
+      _later(3000, function() {
+         fw.stop();
+         ex.stop();
 
-           assertTrue(switch(events[0]) { case FILE_CREATED(_):  true; default: false; });
-           if (events.length == 4) {
-               assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
-               assertTrue(switch(events[2]) { case FILE_MODIFIED(_): true; default: false; });
-               assertTrue(switch(events[3]) { case FILE_DELETED(_):  true; default: false; });
-           } else {
-               assertTrue(switch(events[1]) { case FILE_MODIFIED(_): true; default: false; });
-               assertTrue(switch(events[2]) { case FILE_MODIFIED(_): true; default: false; });
-               assertTrue(switch(events[3]) { case FILE_MODIFIED(_): true; default: false; });
-               assertTrue(switch(events[4]) { case FILE_DELETED(_):  true; default: false; });
-           }
-       });
+         trace(events);
+         assertEquals(Lambda.count(events, e -> e.match(FILE_CREATED(_))), 1);
+         assertMin(Lambda.count(events, e -> e.match(FILE_MODIFIED(_))), 2);
+         assertEquals(Lambda.count(events, e -> e.match(FILE_DELETED(_))), 1);
+      });
    }
 
 
@@ -169,7 +167,6 @@ class TestRunner extends DocTestRunner {
          dir.create();
          subdir.create();
          file.writeString("123");
-         trace("-> create: "  + file );
       });
       _later( 400, function() { file.appendString("456"); trace("-> append: "  + file  ); });
       _later(1500, function() { subdir.delete(true);      trace("-> delete: "  + subdir); });
@@ -178,7 +175,12 @@ class TestRunner extends DocTestRunner {
          fw.stop();
          ex.stop();
 
-         assertTrue(events.length > 5);
+         trace(events);
+         assertEquals(Lambda.count(events, e -> e.match(DIR_CREATED(_))), 3);
+         assertEquals(Lambda.count(events, e -> e.match(DIR_DELETED(_))), 3);
+         assertEquals(Lambda.count(events, e -> e.match(FILE_CREATED(_))), 1);
+         assertMin(Lambda.count(events, e -> e.match(FILE_MODIFIED(_))), 1);
+         assertEquals(Lambda.count(events, e -> e.match(FILE_DELETED(_))), 1);
       });
    }
    #end // filesystem_support
