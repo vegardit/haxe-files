@@ -191,17 +191,18 @@ class PollingFileWatcher extends AbstractFileWatcher {
       }
    }
 
+
    private function scanPath(fsEntry:FSEntry):Void {
 
       switch(fsEntry) {
          case DIR(dir, attrs, children): {
-            final fsEntryNow = dir.path.exists() ? createFSEntry_DIR(dir) : FSEntry.NONEXISTANT(dir.path);
+            final fsEntryNow = createFSEntry_DIR(dir);
             compareFSEntry(fsEntry, fsEntryNow);
             watched.set(dir.path.toString(), fsEntryNow);
          }
 
          case FILE(file, attrs): {
-            final fsEntryNow = file.path.exists() ? createFSEntry_FILE(file) : FSEntry.NONEXISTANT(file.path);
+            final fsEntryNow = createFSEntry_FILE(file);
             compareFSEntry(fsEntry, fsEntryNow);
             watched.set(file.path.toString(), fsEntryNow);
          }
@@ -251,6 +252,8 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
 
    private function createFSEntry_DIR(dir:Dir):FSEntry {
+      if (!dir.path.exists())
+         return FSEntry.NONEXISTANT(dir.path);
 
       final children = new SortedStringMap<FSEntry>();
 
@@ -264,13 +267,17 @@ class PollingFileWatcher extends AbstractFileWatcher {
          }
       }
 
-      return FSEntry.DIR(dir, DirAttrs.fromDir(dir), children);
+      return dir.path.exists() // check if dir was deleted meanwhile
+         ? FSEntry.DIR(dir, DirAttrs.fromDir(dir), children)
+         : FSEntry.NONEXISTANT(dir.path);
    }
 
 
    inline
    private function createFSEntry_FILE(file:File):FSEntry
-      return FSEntry.FILE(file, FileAttrs.fromFile(file));
+      return file.path.exists()
+         ? FSEntry.FILE(file, FileAttrs.fromFile(file))
+         : FSEntry.NONEXISTANT(file.path);
 }
 
 private enum FSEntry {

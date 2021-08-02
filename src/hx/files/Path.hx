@@ -434,8 +434,16 @@ class Path {
    inline
    public function stat():sys.FileStat {
       if (!exists())
-          return null;
-      return sys.FileSystem.stat(toString());
+         return null;
+      try {
+         return sys.FileSystem.stat(toString());
+      } catch (e:Dynamic) {
+         if (!exists())
+            return null;
+         final ex = hx.concurrent.ConcurrentException.capture(e);
+         ex.rethrow();
+         return null; // never reached
+      }
    }
    #end
 
