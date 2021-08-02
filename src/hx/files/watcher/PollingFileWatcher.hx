@@ -145,7 +145,29 @@ class PollingFileWatcher extends AbstractFileWatcher {
                   eventDispatcher.fire(FileSystemEvent.DIR_DELETED(dir));
                   eventDispatcher.fire(FileSystemEvent.FILE_CREATED(file));
                case NONEXISTANT(_) | UNKNOWN(_):
-                  eventDispatcher.fire(FileSystemEvent.DIR_DELETED(dir));
+                  final deletedDirs:Array<Dir> = [ dir ];
+
+                  // traverse the captured children of the deleted directory
+                  // to fire deletion events
+                  final work = [ children ];
+                  while ((children = work.pop()) != null) {
+                     for (child in children) {
+                        switch(child) {
+                           case DIR(dir, attrsNow, childChildren):
+                              deletedDirs.push(dir);
+                              work.push(childChildren);
+                           case FILE(file, _):
+                              eventDispatcher.fire(FileSystemEvent.FILE_DELETED(file));
+                           default:
+                              // nothing to do
+                        }
+                     }
+                  }
+
+                  deletedDirs.reverse();
+                  for(dir in deletedDirs)
+                     eventDispatcher.fire(FileSystemEvent.DIR_DELETED(dir));
+
                case UNSCANNED(_):
                   // nothing to do
             }
@@ -168,7 +190,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
                case DIR(dir, _, children):
                   eventDispatcher.fire(FileSystemEvent.DIR_CREATED(dir));
                   final work = [ children ];
-                  while((children = work.pop()) != null) {
+                  while ((children = work.pop()) != null) {
                      for (child in children) {
                         switch(child) {
                            case DIR(dir, _, childChildren):
