@@ -7,7 +7,6 @@ package hx.files;
 import hx.strings.internal.Either2;
 
 #if (sys || macro || nodejs)
-import sys.FileStat;
 import sys.FileSystem;
 #end
 
