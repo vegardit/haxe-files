@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NPE in FileWatcher in case of very fast file operations (create/delete)
 - PollingFileWatcher does not create deletion event for entries of deleted directories
 
+### Changed
+- `Path.of(null)` now throws an exception
+
 
 ## [2.0.0] - 2020-04-22
 

@@ -1,1 +1,2 @@
 --macro hx.files.internal.Macros.addDefines()
+--macro hx.files.internal.Macros.configureNullSafety()

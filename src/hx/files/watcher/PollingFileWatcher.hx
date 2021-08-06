@@ -22,7 +22,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
    final intervalMS:Int;
 
-   var scanTask:TaskFuture<Void> = null;
+   var scanTask:Null<TaskFuture<Void>>;
 
    final watched = new StringMap<FSEntry>();
    final watchedSync = new RLock();
@@ -52,6 +52,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
    override
    public function onStop():Void {
+      @:nullSafety(Off)
       scanTask.cancel();
       scanTask = null;
    }
@@ -118,14 +119,13 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
    private function compareFSEntry(old:FSEntry, now:FSEntry):Void {
       switch(old:FSEntry) {
-         case DIR(dir, attrs, children):
+         case DIR(dir, attrs, childrenOld):
             switch(now) {
                case DIR(_, attrsNow, childrenNow): {
                   if(!attrs.equals(attrsNow))
                      eventDispatcher.fire(FileSystemEvent.DIR_MODIFIED(dir, attrs, attrsNow));
 
-                  for (childName in children.keys()) {
-                     final child = children.get(childName);
+                  for (childName => child in childrenOld) {
                      var childNow = childrenNow.get(childName);
 
                      if (childNow == null)
@@ -133,10 +133,9 @@ class PollingFileWatcher extends AbstractFileWatcher {
                      compareFSEntry(child, childNow);
                   }
 
-                  for (childName in childrenNow.keys()) {
-                     final child = children.get(childName);
+                  for (childName => childNow in childrenOld) {
+                     final child = childrenOld.get(childName);
                      if (child == null) {
-                        final childNow = childrenNow.get(childName);
                         compareFSEntry(FSEntry.NONEXISTANT(null), childNow);
                      }
                   }
@@ -149,13 +148,14 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
                   // traverse the captured children of the deleted directory
                   // to fire deletion events
-                  final work = [ children ];
-                  while ((children = work.pop()) != null) {
-                     for (child in children) {
+                  final work = [ childrenOld ];
+                  var workItem:Null<SortedStringMap<FSEntry>>;
+                  while ((workItem = work.pop()) != null) {
+                     for (child in workItem) {
                         switch(child) {
-                           case DIR(dir, attrsNow, childChildren):
+                           case DIR(dir, attrsNow, children):
                               deletedDirs.push(dir);
-                              work.push(childChildren);
+                              work.push(children);
                            case FILE(file, _):
                               eventDispatcher.fire(FileSystemEvent.FILE_DELETED(file));
                            default:
@@ -187,15 +187,17 @@ class PollingFileWatcher extends AbstractFileWatcher {
             }
          case NONEXISTANT(_) | UNKNOWN(_):
             switch(now) {
-               case DIR(dir, _, children):
+               case DIR(dir, _, childrenNow):
                   eventDispatcher.fire(FileSystemEvent.DIR_CREATED(dir));
-                  final work = [ children ];
-                  while ((children = work.pop()) != null) {
-                     for (child in children) {
+
+                  final work = [ childrenNow ];
+                  var workItem:Null<SortedStringMap<FSEntry>>;
+                  while ((workItem = work.pop()) != null) {
+                     for (child in workItem) {
                         switch(child) {
-                           case DIR(dir, _, childChildren):
+                           case DIR(dir, _, children):
                               eventDispatcher.fire(FileSystemEvent.DIR_CREATED(dir));
-                              work.push(childChildren);
+                              work.push(children);
                            case FILE(file, _):
                               eventDispatcher.fire(FileSystemEvent.FILE_CREATED(file));
                            default:
@@ -230,7 +232,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
          }
 
          case NONEXISTANT(path): {
-            if (!path.exists())
+            if (path == null || !path.exists())
                 return;
 
             if (path.isDirectory()) {
@@ -305,7 +307,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
 private enum FSEntry {
    DIR(dir:Dir, attrs:DirAttrs, children:SortedStringMap<FSEntry>);
    FILE(file:File, attrs:FileAttrs);
-   NONEXISTANT(path:Path);
+   NONEXISTANT(?path:Path);
    UNSCANNED(path:Path);
    UNKNOWN(path:Path);
 }

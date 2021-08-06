@@ -38,12 +38,12 @@ typedef JPath = hx.files.internal.externs.java.nio.file.Path;
  */
 class JavaFileWatcher extends AbstractFileWatcher {
 
-   var pollTask:TaskFuture<Void> = null;
+   var pollTask:Null<TaskFuture<Void>>;
 
    final watched = new StringMap<WatchEntry>();
    final watchedSync = new RLock();
 
-   var watchService:WatchService;
+   var watchService:Null<WatchService>;
 
    /**
      * @param executor the executor to be used for scheduling/executing the background polling task and for notifying subscribers of FileSystemEvents (optional, defaults to hx.concurrent.event.SyncEventDispatcher)
@@ -72,6 +72,7 @@ class JavaFileWatcher extends AbstractFileWatcher {
 
    override
    public function onStop():Void {
+      @:nullSafety(Off)
       watchService.close();
       watchService = null;
    }
@@ -136,11 +137,9 @@ class JavaFileWatcher extends AbstractFileWatcher {
          if (watched.exists(pathStr))
             return;
 
-         final entry = new WatchEntry();
-         entry.path = pathObj;
-         entry.jpath = FileSystems.getDefault().getPath(pathStr, new java.NativeArray(0));
+         final jpath = FileSystems.getDefault().getPath(pathStr, new java.NativeArray(0));
+         final entry = new WatchEntry(jpath, pathObj, createWatchKey(jpath));
          entry.collectExistingDirs();
-         entry.watchKey = createWatchKey(entry.jpath);
          watched.set(pathStr, entry);
       });
    }
@@ -155,9 +154,9 @@ class JavaFileWatcher extends AbstractFileWatcher {
       if (OS.isWindows) {
          final opts = new java.NativeArray<WatchEvent_Modifier>(1);
          opts[0] = ExtendedWatchEventModifier.FILE_TREE;
-         return jpath.register(watchService, kinds, opts);
+         return @:nullSafety(Off) jpath.register(watchService, kinds, opts);
       }
-      return jpath.register(watchService, kinds, new java.NativeArray<WatchEvent_Modifier>(0));
+      return @:nullSafety(Off) jpath.register(watchService, kinds, new java.NativeArray<WatchEvent_Modifier>(0));
    }
 
 
@@ -186,16 +185,19 @@ class JavaFileWatcher extends AbstractFileWatcher {
 }
 
 
-private class WatchEntry {
+private final class WatchEntry {
 
    public final existingDirs = new StringArray();
 
-   public var jpath:JPath;
-   public var path:Path;
+   public final jpath:JPath;
+   public final path:Path;
    public var watchKey:WatchKey;
 
    inline
-   public function new() {
+   public function new(jpath:JPath, path:Path, watchKey:WatchKey) {
+      this.jpath = jpath;
+      this.path = path;
+      this.watchKey = watchKey;
    };
 
    public function collectExistingDirs() {

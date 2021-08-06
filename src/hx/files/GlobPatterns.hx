@@ -68,8 +68,9 @@ class GlobPatterns {
     *
     * @return a hx.strings.Pattern object
     */
+   @:nullSafety(Off) // workaround false positive
    inline
-   public static function toPattern(globPattern:String, options:Either3<String, MatchingOption, Array<MatchingOption>> = null):Pattern
+   public static function toPattern(globPattern:String, ?options:Either3<String, MatchingOption, Array<MatchingOption>>):Pattern
       return toRegEx(globPattern).toPattern(options);
 
 

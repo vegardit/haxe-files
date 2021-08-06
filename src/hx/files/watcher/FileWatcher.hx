@@ -33,7 +33,7 @@ enum FileSystemEvent {
     * @param old attributes at the time before the event occurred, may be null depending on implementation
     * @param now attributes at the time when the event occurred, may be null depending on implementation
     */
-   DIR_MODIFIED(dir:Dir, old:DirAttrs, now:DirAttrs);
+   DIR_MODIFIED(dir:Dir, ?old:DirAttrs, ?now:DirAttrs);
 
    FILE_CREATED(file:File);
 
@@ -43,7 +43,7 @@ enum FileSystemEvent {
     * @param old attributes at the time before the event occurred, may be null depending on implementation
     * @param now attributes at the time when the event occurred, may be null depending on implementation
     */
-   FILE_MODIFIED(file:File, old:FileAttrs, now:FileAttrs);
+   FILE_MODIFIED(file:File, ?old:FileAttrs, ?now:FileAttrs);
 }
 
 

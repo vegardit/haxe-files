@@ -43,7 +43,7 @@ class Path {
     * >>> Path.unix(".."           ).toString() == ".."
     * >>> Path.unix("."            ).toString() == "."
     * >>> Path.unix(""             ).toString() == ""
-    * >>> Path.unix(null           ).toString() == null
+    * >>> Path.unix(null           ).toString() throws "[path] must not be null"
     *
     * >>> Path.unix("  /  dir/// file  //"       ).toString() == "/dir/file"
     * >>> Path.unix("  /  dir/// file  //", false).toString() == "  /  dir/ file  "
@@ -71,7 +71,7 @@ class Path {
     * >>> Path.win(".."                 ).toString() == ".."
     * >>> Path.win("."                  ).toString() == "."
     * >>> Path.win(""                   ).toString() == ""
-    * >>> Path.win(null                 ).toString() == null
+    * >>> Path.win(null                 ).toString() throws "[path] must not be null"
     *
     * >>> Path.win("\\\\server\\dir"        ).toString() == "\\\\server\\dir"
     * >>> Path.win("\\\\server"             ).toString() == "\\\\server\\"
@@ -101,7 +101,7 @@ class Path {
     * >>> Path.unix("/foo"   ).dirSep == "/"
     * </code></pre>
     */
-   public var dirSep(default, null):String;
+   public final dirSep:String;
 
 
    /**
@@ -112,7 +112,7 @@ class Path {
     * >>> Path.unix("/foo"   ).pathSep == ":"
     * </code></pre>
     */
-   public var pathSep(default, null):String;
+   public final pathSep:String;
 
 
    /**
@@ -120,10 +120,10 @@ class Path {
     *
     * <pre><code>
     * >>> Path.win("C:\\foo").extSep == "."
-    * >>> Path.unix("/foo"   ).extSep == "."
+    * >>> Path.unix("/foo"  ).extSep == "."
     * </code></pre>
     */
-   public var extSep(default, null):String = ".";
+   public final extSep:String;
 
 
    /**
@@ -142,7 +142,6 @@ class Path {
     * >>> Path.win(".."           ).isAbsolute == false
     * >>> Path.win("."            ).isAbsolute == false
     * >>> Path.win(""             ).isAbsolute == false
-    * >>> Path.win(null           ).isAbsolute == false
     * >>> Path.win("\\\\server\\dir"        ).isAbsolute == true
     * >>> Path.win("\\\\?\\UNC\\server\\dir").isAbsolute == true
     * >>> Path.win("\\\\?\\C:\\dir"         ).isAbsolute == true
@@ -157,7 +156,6 @@ class Path {
     * >>> Path.unix(".."          ).isAbsolute == false
     * >>> Path.unix("."           ).isAbsolute == false
     * >>> Path.unix(""            ).isAbsolute == false
-    * >>> Path.unix(null          ).isAbsolute == false
     * </code></pre>
     */
    public var isAbsolute(get, never):Bool;
@@ -168,7 +166,7 @@ class Path {
    /**
     * Indicates if this object represents a path compatible with the local operating/file system.
     */
-   public var isLocal(default, null):Bool;
+   public var isLocal(default, null) = false;
 
 
    /**
@@ -192,7 +190,7 @@ class Path {
     * >>> Path.unix("/foo"   ).isUnix == true
     * </code></pre>
     */
-   public var isUnix(default, null):Bool;
+   public var isUnix(default, null) = false;
 
 
    /**
@@ -203,20 +201,24 @@ class Path {
     * >>> Path.unix("/foo"   ).isWindows == false
     * </code></pre>
     */
-   public var isWindows(default, null):Bool;
+   public var isWindows(default, null) = false;
 
 
    /**
     * Protected constructor.
     */
-   function new(parent:Path, filename:String) {
+   function new(parent:Null<Path>, filename:String, dirSep:String, pathSep:String, extSep = ".") {
       this.parent = parent;
       this.filename = filename;
+      this.dirSep = dirSep;
+      this.pathSep = pathSep;
+      this.extSep = extSep;
    }
 
 
    function assertIsLocal() {
       if (!isLocal) {
+         #if nodejs @:nullSafety(Off) #end
          final className = Type.getClassName(Type.getClass(this));
          throw 'This path object of type "$className" is not compatible with the local operating/file system';
       }
@@ -237,7 +239,6 @@ class Path {
     * >>> Path.of(".."            ).exists() == true
     * >>> Path.of("."             ).exists() == true
     * >>> Path.of(""              ).exists() == false
-    * >>> Path.of(null            ).exists() == false
     * </code></pre>
     *
     * @return true if the path exists (does not check whether it points to a file or a directory)
@@ -245,9 +246,6 @@ class Path {
     * @throws if path is not compatible with local operating/file system
     */
    public function exists():Bool {
-      if(filename == null)
-         return false;
-
       assertIsLocal();
 
       final path = toString();
@@ -285,7 +283,6 @@ class Path {
     * >>> Path.win(".."               ).filename == ".."
     * >>> Path.win("."                ).filename == "."
     * >>> Path.win(""                 ).filename == ""
-    * >>> Path.win(null               ).filename == null
     * >>> Path.win("\\\\server\\dir\\"        ).filename == "dir"
     * >>> Path.win("\\\\?\\C:\\dir\\"         ).filename == "dir"
     * >>> Path.win("\\\\?\\UNC\\server\\dir\\").filename == "dir"
@@ -301,7 +298,6 @@ class Path {
     * >>> Path.unix(".."            ).filename == ".."
     * >>> Path.unix("."             ).filename == "."
     * >>> Path.unix(""              ).filename == ""
-    * >>> Path.unix(null            ).filename == null
     * </code></pre>
     */
    public final filename:String;
@@ -320,7 +316,6 @@ class Path {
     * >>> Path.win(".."                  ).filenameStem == ".."
     * >>> Path.win("."                   ).filenameStem == "."
     * >>> Path.win(""                    ).filenameStem == ""
-    * >>> Path.win(null                  ).filenameStem == null
     * >>> Path.win("\\\\server\\dir\\"        ).filenameStem == "dir"
     * >>> Path.win("\\\\?\\C:\\dir\\"         ).filenameStem == "dir"
     * >>> Path.win("\\\\?\\server\\dir\\"     ).filenameStem == "dir"
@@ -335,13 +330,10 @@ class Path {
     * >>> Path.unix(".."                ).filenameStem == ".."
     * >>> Path.unix("."                 ).filenameStem == "."
     * >>> Path.unix(""                  ).filenameStem == ""
-    * >>> Path.unix(null                ).filenameStem == null
     * </code></pre>
     */
    public var filenameStem(get, never):String;
    function get_filenameStem() {
-      if (filename == null)
-         return null;
       if (filename.length == 1 || filename == "..")
          return filename;
       return filename.substringBeforeLast(extSep, INPUT);
@@ -361,7 +353,6 @@ class Path {
     * >>> Path.win(".."                  ).filenameExt == ""
     * >>> Path.win("."                   ).filenameExt == ""
     * >>> Path.win(""                    ).filenameExt == ""
-    * >>> Path.win(null                  ).filenameExt == null
     * >>> Path.win("\\\\server\\dir\\"        ).filenameExt == ""
     * >>> Path.win("\\\\?\\C:\\dir\\"         ).filenameExt == ""
     * >>> Path.win("\\\\?\\server\\dir\\"     ).filenameExt == ""
@@ -376,13 +367,10 @@ class Path {
     * >>> Path.unix(".."                ).filenameExt == ""
     * >>> Path.unix("."                 ).filenameExt == ""
     * >>> Path.unix(""                  ).filenameExt == ""
-    * >>> Path.unix(null                ).filenameExt == null
     * </code></pre>
     */
    public var filenameExt(get, never):String;
    function get_filenameExt() {
-      if (filename == null)
-         return null;
       if (filename.length == 1 || filename == "..")
          return "";
       return filename.substringAfterLast(extSep, EMPTY);
@@ -396,7 +384,6 @@ class Path {
     * >>> Path.of(".."                    ).getAbsolutePath() != ".."
     * >>> Path.of("."                     ).getAbsolutePath() != "."
     * >>> Path.of("src"                   ).getAbsolutePath() != "src"
-    * >>> Path.of(null                    ).getAbsolutePath() == null
     *
     * >>> Path.win("C:\\test\\foo\\..\\bar").getAbsolutePath() == "C:\\test\\bar"
     *
@@ -404,10 +391,6 @@ class Path {
     * </code></pre>
     */
    public function getAbsolutePath():String {
-
-      if (filename == null)
-         return null;
-
       if (isAbsolute)
          return normalize().toString();
 
@@ -432,7 +415,7 @@ class Path {
      * @return null if no filesystem object exists on the path
      */
    inline
-   public function stat():sys.FileStat {
+   public function stat():Null<sys.FileStat> {
       if (!exists())
          return null;
       try {
@@ -458,7 +441,6 @@ class Path {
     * >>> Path.of("."           ).getModificationTime() > 0
     * >>> Path.of(""            ).getModificationTime() == -1
     * >>> Path.of("non-existing").getModificationTime() == -1
-    * >>> Path.of(null          ).getModificationTime() == -1
     * <code></pre>
     *
     * @return -1 if path does not exist
@@ -499,7 +481,6 @@ class Path {
     * >>> Path.of("."           ).isDirectory() == true
     * >>> Path.of(""            ).isDirectory() == false
     * >>> Path.of("non-existing").isDirectory() == false
-    * >>> Path.of(null          ).isDirectory() == false
     * <code></pre>
     */
    public function isDirectory():Bool {
@@ -532,7 +513,6 @@ class Path {
     * >>> Path.of("."           ).isFile() == false
     * >>> Path.of(""            ).isFile() == false
     * >>> Path.of("non-existing").isFile() == false
-    * >>> Path.of(null          ).isFile() == false
     * <code></pre>
     */
    public function isFile():Bool {
@@ -570,7 +550,6 @@ class Path {
     * >>> Path.win("dir").join(""         ).toString() == "dir"
     * >>> Path.win("dir").join(null       ).toString() == "dir"
     * >>> Path.win(""   ).join("dir"      ).toString() == "dir"
-    * >>> Path.win(null ).join("dir"      ).toString() == null
     *
     * >>> Path.unix("/"  ).join("file"    ).toString() == "/file"
     * >>> Path.unix("dir").join("file"    ).toString() == "dir/file"
@@ -580,13 +559,12 @@ class Path {
     * >>> Path.unix("dir").join(null      ).toString() == "dir"
     * >>> Path.unix(""   ).join("dir"     ).toString() == "dir"
     * >>> Path.unix(""   ).join("dir/file").toString() == "dir/file"
-    * >>> Path.unix(null ).join("dir"     ).toString() == null
     * </code><pre>
     *
     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
     */
    public function join(path:Either2<String, Path>, trimWhiteSpaces = true):Path {
-      if (path == null || filename == null)
+      if (path == null)
          return this;
 
       if (filename.isEmpty()) {
@@ -627,7 +605,6 @@ class Path {
     * >>> Path.win("dir").joinAll(["dir", ""         ]).toString() == "dir\\dir"
     * >>> Path.win("dir").joinAll(["dir", null       ]).toString() == "dir\\dir"
     * >>> Path.win(""   ).joinAll(["dir", "dir"      ]).toString() == "dir\\dir"
-    * >>> Path.win(null ).joinAll(["dir", "dir"      ]).toString() == null
     *
     * >>> Path.unix("/"  ).joinAll(["dir", "file"    ]).toString() == "/dir/file"
     * >>> Path.unix("dir").joinAll(["dir", "file"    ]).toString() == "dir/dir/file"
@@ -636,13 +613,12 @@ class Path {
     * >>> Path.unix("dir").joinAll(["dir", ""        ]).toString() == "dir/dir"
     * >>> Path.unix("dir").joinAll(["dir", null      ]).toString() == "dir/dir"
     * >>> Path.unix(""   ).joinAll(["dir", "dir"     ]).toString() == "dir/dir"
-    * >>> Path.unix(null ).joinAll(["dir", "dir"     ]).toString() == null
     * </code><pre>
     *
     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
     */
    public function joinAll(paths:Array<Either2<String, Path>>, trimWhiteSpaces = true):Path {
-      if (filename == null || paths == null || paths.length == 0)
+      if (paths == null || paths.length == 0)
          return this;
 
       if (paths.length == 1)
@@ -683,7 +659,6 @@ class Path {
     * >>> Path.win(".."                  ).parent == null
     * >>> Path.win("."                   ).parent == null
     * >>> Path.win(""                    ).parent == null
-    * >>> Path.win(null                  ).parent == null
     * >>> Path.win("\\\\server\\dir"        ).parent.toString() == "\\\\server\\"
     * >>> Path.win("\\\\server"             ).parent == null
     * >>> Path.win("\\\\?\\C:\\dir"         ).parent.toString() == "C:\\"
@@ -701,10 +676,9 @@ class Path {
     * >>> Path.unix(".."                ).parent == null
     * >>> Path.unix("."                 ).parent == null
     * >>> Path.unix(""                  ).parent == null
-    * >>> Path.unix(null                ).parent == null
     * </code></pre>
     */
-   public final parent:Path;
+   public final parent:Null<Path>;
 
 
    /**
@@ -721,7 +695,6 @@ class Path {
     * >>> Path.win(".."                  ).root == null
     * >>> Path.win("."                   ).root == null
     * >>> Path.win(""                    ).root == null
-    * >>> Path.win(null                  ).root == null
     * >>> Path.win("\\\\server\\dir"        ).root.toString() == "\\\\server\\"
     * >>> Path.win("\\\\server"             ).root.toString() == "\\\\server\\"
     * >>> Path.win("\\\\?\\UNC\\server\\dir").root.toString() == "\\\\server\\"
@@ -741,11 +714,10 @@ class Path {
     * >>> Path.unix(".."                ).root == null
     * >>> Path.unix("."                 ).root == null
     * >>> Path.unix(""                  ).root == null
-    * >>> Path.unix(null                ).root == null
     * </code></pre>
     */
-   public var root(get, null):Path;
-   function get_root():Path throw "Not implemented";
+   public var root(get, null):Null<Path>;
+   function get_root():Null<Path> throw "Not implemented";
 
 
    inline
@@ -773,7 +745,6 @@ class Path {
     * >>> Path.win(".."                 ).toStringWithTrailingSeparator() == "..\\"
     * >>> Path.win("."                  ).toStringWithTrailingSeparator() == ".\\"
     * >>> Path.win(""                   ).toStringWithTrailingSeparator() == ""
-    * >>> Path.win(null                 ).toStringWithTrailingSeparator() == null
     *
     * >>> Path.unix("/dir/file"    ).toStringWithTrailingSeparator() == "/dir/file/"
     * >>> Path.unix("/dir/file/"   ).toStringWithTrailingSeparator() == "/dir/file/"
@@ -784,7 +755,6 @@ class Path {
     * >>> Path.unix(".."           ).toStringWithTrailingSeparator() == "../"
     * >>> Path.unix("."            ).toStringWithTrailingSeparator() == "./"
     * >>> Path.unix(""             ).toStringWithTrailingSeparator() == ""
-    * >>> Path.unix(null           ).toStringWithTrailingSeparator() == null
     * </code></pre>
     */
    public function toStringWithTrailingSeparator():String {
@@ -799,11 +769,8 @@ class Path {
 
 
    public function toString():String {
-      if (filename == null)
-         return null;
-
       final parts = new StringArray();
-      var part = this;
+      var part:Null<Path> = this;
       while (part != null) {
          parts.push(part.filename);
 
@@ -835,7 +802,6 @@ class Path {
     * >>> Path.win(".."              ).normalize().toString() == ".."
     * >>> Path.win("."               ).normalize().toString() == "."
     * >>> Path.win(""                ).normalize().toString() == ""
-    * >>> Path.win(null              ).normalize().toString() == null
     *
     * >>> Path.unix("a/b/../c/" ).normalize().toString() == "a/c"
     * >>> Path.unix("a/../b/c/" ).normalize().toString() == "b/c"
@@ -845,7 +811,6 @@ class Path {
     * >>> Path.unix(".."        ).normalize().toString() == ".."
     * >>> Path.unix("."         ).normalize().toString() == "."
     * >>> Path.unix(""          ).normalize().toString() == ""
-    * >>> Path.unix(null        ).normalize().toString() == null
     * </code></pre>
     */
    public function normalize():Path {
@@ -855,7 +820,7 @@ class Path {
       final isAbsolute = this.isAbsolute;
 
       final parts = new StringArray();
-      var part = this;
+      var part:Null<Path> = this;
       while (part != null) {
          final parent = part.parent;
          if(parent == null && isAbsolute) break;
@@ -881,6 +846,7 @@ class Path {
          resultParts.push(part);
       }
 
+      @:nullSafety(Off)
       return newPathForString(isAbsolute ? root + resultParts.join(dirSep) : resultParts.join(dirSep), false);
    }
 
@@ -896,8 +862,6 @@ class Path {
     * >>> Path.win("\\\\winserver\\documents\\text.doc").ellipsize(25)        == "\\\\winserver\\...\\text.doc"
     * >>> Path.win(""  ).ellipsize(3) == ""
     * >>> Path.win("." ).ellipsize(0) throws "[maxLength] must not be smaller than 1"
-    * >>> Path.win(null).ellipsize(3) == null
-    * >>> Path.win(null).ellipsize(0) == null
     *
     * >>> Path.unix("/home/user/foo/bar"     ).ellipsize(15)        == '/home/.../bar'
     * >>> Path.unix("/home/user/foo/bar"     ).ellipsize(3)         == '...'
@@ -905,8 +869,6 @@ class Path {
     * >>> Path.unix("/home/user/foo/bar"     ).ellipsize(12, false) == '/.../bar'
     * >>> Path.unix(""  ).ellipsize(3) == ""
     * >>> Path.unix("." ).ellipsize(0) throws "[maxLength] must not be smaller than 1"
-    * >>> Path.unix(null).ellipsize(3) == null
-    * >>> Path.unix(null).ellipsize(0) == null
     * </code></pre>
     *
     * @throws exception if maxLength < ellipsis.length
@@ -978,7 +940,6 @@ class UnixPath extends Path {
    public static inline final DIR_SEP = "/";
 
 
-   static final NULL    = new UnixPath(null, null);
    static final EMPTY   = new UnixPath(null, "");
    static final ROOT    = new UnixPath(null, "/");
    static final HOME    = new UnixPath(null, "~");
@@ -992,14 +953,14 @@ class UnixPath extends Path {
    public static function of(path:String, trimWhiteSpaces = true):UnixPath {
 
       if (path == null)
-         return NULL;
+         throw "[path] must not be null";
 
       final parts = clean(path, trimWhiteSpaces);
 
-      if (parts.length == 0)
+      if (parts.isEmpty())
          return EMPTY;
 
-      var p:UnixPath = null;
+      var p:Null<UnixPath> = EMPTY;
       for (i in 0...parts.length) {
          final part = parts[i];
          if (i == 0) {
@@ -1012,6 +973,7 @@ class UnixPath extends Path {
          } else
             p = new UnixPath(p, part);
       }
+      @:nullSafety(Off)
       return p;
    }
 
@@ -1037,18 +999,19 @@ class UnixPath extends Path {
    }
 
 
-   function new(parent:Path, file:String) {
-      super(parent, file);
-      dirSep = DIR_SEP;
-      pathSep = ":";
+   function new(parent:Null<Path>, path:String) {
+      if (path == null)
+         throw "[path] must not be null";
+
+      super(parent, path, DIR_SEP, ":");
       isLocal = !hx.strings.internal.OS.isWindows;
       isUnix = true;
       isWindows = false;
    }
 
    override
-   function get_root():Path {
-      var p:Path = this;
+   function get_root():Null<Path> {
+      var p:Null<Path> = this;
       while (p != null) {
          if (p == ROOT)
             return ROOT;
@@ -1079,7 +1042,6 @@ class WindowsPath extends Path {
    public static inline final UNC_PREFIX = "\\\\";
 
 
-   static final NULL       = new WindowsPath(null, null);
    static final DRIVE_ROOT = new WindowsPath(null, "\\");
    static final EMPTY      = new WindowsPath(null, "");
    static final CURRENT    = new WindowsPath(null, ".");
@@ -1092,14 +1054,14 @@ class WindowsPath extends Path {
    public static function of(path:String, trimWhiteSpaces = true):WindowsPath {
 
       if (path == null)
-         return NULL;
+         throw "[path] must not be null";
 
       final parts = clean(path, trimWhiteSpaces);
 
       if (parts == null || parts.isEmpty())
          return EMPTY;
 
-      var p:WindowsPath = null;
+      var p:Null<WindowsPath> = null;
       for (i in 0...parts.length) {
          var part = parts[i];
          if (i == 0) {
@@ -1111,11 +1073,12 @@ class WindowsPath extends Path {
          } else
              p = new WindowsPath(p, part);
       }
+      @:nullSafety(Off)
       return p;
    }
 
 
-   static function clean(path:String, trimWhiteSpaces:Bool):StringArray {
+   static function clean(path:String, trimWhiteSpaces:Bool):Null<StringArray> {
       if (trimWhiteSpaces)
          path = path.trim();
 
@@ -1215,7 +1178,10 @@ class WindowsPath extends Path {
          }
       } else {
             final part1 = cleaned[0];
-            if (part1.length == 2 && part1.charCodeAt8(0).isAsciiAlpha() && part1.charCodeAt8(1) == Char.COLON)
+            if (part1.length == 2 &&
+               part1.charCodeAt8(0).isAsciiAlpha() &&
+               part1.charCodeAt8(1) == Char.COLON
+            )
                // set drive letter to upper case
                cleaned[0] = part1.charAt8(0).toUpperCase() + Char.COLON + DIR_SEP;
         }
@@ -1224,10 +1190,11 @@ class WindowsPath extends Path {
     }
 
 
-   function new(parent:Path, file:String) {
-      super(parent, file);
-      dirSep = DIR_SEP;
-      pathSep = ";";
+    function new(parent:Null<Path>, path:String) {
+      if (path == null)
+         throw "[path] must not be null";
+
+      super(parent, path, DIR_SEP, ";");
       isLocal = hx.strings.internal.OS.isWindows;
       this.isUnix = false;
       this.isWindows = true;
@@ -1235,8 +1202,8 @@ class WindowsPath extends Path {
 
 
    override
-   function get_root():Path {
-      var p:Path = this;
+   function get_root():Null<Path> {
+      var p:Null<Path> = this;
       while (p != null) {
          if (p.parent == null && p != DRIVE_ROOT && p.filename.endsWith(dirSep))
             return p;

@@ -75,7 +75,9 @@ class Dir {
          return Dir.of("" + untyped __js__("system.env['HOME']"));
       #elseif (sys || nodejs)
          if (hx.strings.internal.OS.isWindows)
+            #if nodejs @:nullSafety(Off) #end
             return Dir.of(Sys.getEnv("HOMEDRIVE") + Sys.getEnv("HOMEPATH"));
+         #if nodejs @:nullSafety(Off) #end
          return Dir.of(Sys.getEnv("HOME"));
       #else
          throw "Operation not supported on current target.";
@@ -87,11 +89,15 @@ class Dir {
    /**
     * This method does not check if the path actually exists and if it currently points to a directory or a file
     *
+    * <pre><code>
+    * >>> Dir.of(null) throws "[path] must not be null"
+    * </code></pre>
+    *
     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
     */
    public static function of(path:Either2<String, Path>, trimWhiteSpaces = true):Dir {
       if (path == null)
-         return new Dir(Path.of(null));
+         throw "[path] must not be null";
 
       return switch(path.value) {
          case a(str): new Dir(Path.of(str, trimWhiteSpaces));
@@ -126,7 +132,6 @@ class Dir {
     * Creates the given directory incl. all parent directories in case they don't exist yet
     *
     * <pre><code>
-    * >>> Dir.of(null                ).create() throws "[path.filename] must not be null or empty!"
     * >>> Dir.of("target/foo/bar/dog").create() throws nothing
     * >>> Dir.of("target/foo/bar"    ).create() == false
     * >>> Dir.of("README.md"         ).create() throws '[path] "README.md" exists but is not a directory!'
@@ -197,8 +202,8 @@ class Dir {
       var trimWhiteSpaces = true;
       var overwrite = false;
       var merge = false;
-      var onFile:(File, File) -> Void = null;
-      var onDir:(Dir, Dir) -> Void = null;
+      var onFile:Null<(File, File) -> Void> = null;
+      var onDir:Null<(Dir, Dir) -> Void> = null;
 
       if (options != null) for (o in options) {
          switch(o) {
@@ -282,7 +287,6 @@ class Dir {
     * Recursively deletes the given directory.
     *
     * <pre><code>
-    * >>> Dir.of(null       ).delete() == false
     * >>> Dir.of(""         ).delete() == false
     * >>> Dir.of("README.md").delete() throws '[path] "README.md" exists but is not a directory!'
     *
@@ -331,7 +335,7 @@ class Dir {
    /**
     * @param globPattern Pattern in the Glob syntax style, see https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob
     */
-   public function find(globPattern:String, onFileMatch:File -> Void, onDirMatch:Dir -> Void) {
+   public function find(globPattern:String, onFileMatch:Null<File -> Void>, onDirMatch:Null<Dir -> Void>) {
 
       if (!path.exists())
          return;
@@ -345,11 +349,13 @@ class Dir {
 
       Dir.of(searchRootPath).walk(
          function(file) {
+            #if python @:nullSafety(Off) #end
             if (filePattern.match(file.path.toString().substr8(searchRootOffset))) {
                if (onFileMatch != null) onFileMatch(file);
             }
          },
          function(dir) {
+            #if python @:nullSafety(Off) #end
             if (filePattern.match(dir.path.toString().substr8(searchRootOffset))) {
                if (onDirMatch != null) onDirMatch(dir);
             }
@@ -369,7 +375,6 @@ class Dir {
     * >>> [ for (d in Dir.of(".").findFiles("**" + "/*.hx")) d.path.filename ].indexOf("Dir.hx")    >  -1
     * >>> [ for (d in Dir.of(".").findFiles("*"  + "/*.hx")) d.path.filename ].indexOf("Dir.hx")    == -1
     *
-    * >>> Dir.of(null).findDirs("*").length == 0
     * >>> Dir.of(""  ).findDirs("*").length  == 0
     * </code></pre>
     */
@@ -390,7 +395,6 @@ class Dir {
     * >>> [ for (f in Dir.of(".").findFiles("**" + "/*.hx")) f.path.filename ].indexOf("Dir.hx")    >  -1
     * >>> [ for (f in Dir.of(".").findFiles("*"  + "/*.hx")) f.path.filename ].indexOf("Dir.hx")    == -1
     *
-    * >>> Dir.of(null).findFiles("*").length == 0
     * >>> Dir.of(""  ).findFiles("*").length == 0
     * </code></pre>
     */
@@ -408,7 +412,6 @@ class Dir {
     * >>> [ for (p in Dir.of(".").list()) p.filename ].indexOf("src"      ) > -1
     * >>> [ for (p in Dir.of(".").list()) p.filename ].indexOf("README.md") > -1
     *
-    * >>> Dir.of(null).list()          == []
     * >>> Dir.of("nonexistent").list() == []
     * >>> Dir.of("README.md").list()   throws '[path] "README.md" exists but is not a directory!'
     * <code></pre>
@@ -422,9 +425,19 @@ class Dir {
       var entries:Array<String>;
 
       #if (sys || macro || nodejs)
-         entries = FileSystem.readDirectory(path.toString());
+         try {
+            entries = FileSystem.readDirectory(path.toString());
+         } catch (ex:Any) {
+            // in case of race condition when directory is deleted during execution of this method
+            return [];
+         }
       #elseif phantomjs
-         entries = [for (entry in js.phantomjs.FileSystem.list(path.toString())) if (entry != "." && entry != "..") entry];
+         try {
+            entries = [ for (entry in js.phantomjs.FileSystem.list(path.toString())) if (entry != "." && entry != "..") entry ];
+         } catch (ex:Any) {
+            // in case of race condition when directory is deleted during execution of this method
+            return [];
+         }
       #else
          throw "Operation not supported on current target.";
       #end
@@ -441,7 +454,6 @@ class Dir {
     * >>> [ for (f in Dir.of(".").listDirs()) f.path.filename ].indexOf("src"      ) >  -1
     * >>> [ for (f in Dir.of(".").listDirs()) f.path.filename ].indexOf("README.md") ==  -1
     *
-    * >>> Dir.of(null).listDirs()          == []
     * >>> Dir.of("nonexistent").listDirs() == []
     * >>> Dir.of("README.md").listDirs()   throws '[path] "README.md" exists but is not a directory!'
     * <code></pre>
@@ -457,7 +469,6 @@ class Dir {
     * >>> [ for (f in Dir.of(".").listFiles()) f.path.filename ].indexOf("src"      ) == -1
     * >>> [ for (f in Dir.of(".").listFiles()) f.path.filename ].indexOf("README.md") >  -1
     *
-    * >>> Dir.of(null).listFiles()          == []
     * >>> Dir.of("nonexistent").listFiles() == []
     * >>> Dir.of("README.md").listFiles()   throws '[path] "README.md" exists but is not a directory!'
     * <code></pre>
@@ -563,7 +574,7 @@ class Dir {
       if (newDirName.containsAny([Path.UnixPath.DIR_SEP, Path.WindowsPath.DIR_SEP]))
          throw '[newDirName] "$newDirName" must not contain directory separators!';
 
-      var opts:Array<DirMoveOption> = null;
+      var opts:Null<Array<DirMoveOption>> = null;
 
       if (options != null) for (o in options) {
          switch(o) {
@@ -574,6 +585,7 @@ class Dir {
       if (path.parent == null)
          return moveTo(newDirName, opts);
 
+      @:nullSafety(Off)
       return moveTo(path.parent.join(newDirName), opts);
    }
 
@@ -617,16 +629,16 @@ class Dir {
     * >>> Dir.of("." ).walk(function (file) {}, function (dir) return true) throws nothing
     * >>> Dir.of("." ).walk(function (file) {})                             throws nothing
     * >>> Dir.of("." ).walk(null)                                           throws nothing
-    * >>> Dir.of(null).walk(null)                                           throws nothing
     * </code></pre>
     *
     * @param onFile callback function that is invoked on each found file
     * @param onDir callback function that is invoked on each found directory, if returns false, traversing stops
     */
-   public function walk(onFile:File -> Void, ?onDir:Dir -> Bool):Void {
+   public function walk(onFile:Null<File -> Void>, ?onDir:Dir -> Bool):Void {
       var nodes:Array<Path> = list();
       while (nodes.length > 0) {
-         var node = nodes.shift();
+         @:nullSafety(Off)
+         final node:Path = nodes.shift();
          if (node.isDirectory()) {
             var dir = node.toDir();
             if (onDir == null || onDir(dir)) {

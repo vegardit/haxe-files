@@ -29,11 +29,15 @@ class File {
    /**
     * This method does not check if the path actually exists and if it currently points to a directory or a file
     *
+    * <pre><code>
+    * >>> File.of(null) throws "[path] must not be null"
+    * </code></pre>
+    *
     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
     */
    public static function of(path:Either2<String, Path>, trimWhiteSpaces = true):File {
       if (path == null)
-         return new File(Path.of(null));
+         throw "[path] must not be null";
 
       return switch(path.value) {
          case a(str): new File(Path.of(str, trimWhiteSpaces));
@@ -46,7 +50,7 @@ class File {
 
 
    inline
-   function new(path:Path) {
+   private function new(path:Path) {
       this.path = path;
    }
 
@@ -54,7 +58,7 @@ class File {
 
    function assertValidPath(mustExist = true) {
       if (path.filename.isEmpty())
-         throw "[path.filename] must not be null or empty!";
+         throw "[path.filename] must not be empty!";
 
       if (path.exists()) {
          if (!path.isFile()) throw '[path] "$path" exists but is not a file!';
@@ -84,10 +88,10 @@ class File {
     * >>> File.of("target/test.txt").appendString("HO!")                 throws nothing
     * >>> File.of("target/test.txt").readAsString().indexOf("HEY!") > -1 == true
     * >>> File.of("target/test.txt").delete()                            == true
-    * >>> File.of(""               ).appendString("")                    throws "[path.filename] must not be null or empty!"
+    * >>> File.of(""               ).appendString("")                    throws "[path.filename] must not be empty!"
     * </code></pre>
     */
-   public function appendString(content:String):Void {
+   public function appendString(content:Null<String>):Void {
 
       assertValidPath(false);
 
@@ -95,7 +99,7 @@ class File {
          return;
 
       #if (sys || macro)
-         var ex:ConcurrentException = null;
+         var ex:Null<ConcurrentException> = null;
          var out = sys.io.File.append(path.toString());
          try {
             out.writeString(content);
@@ -123,7 +127,6 @@ class File {
     * >>> File.of("target/test.txt").delete() == true
     * >>> File.of("target"         ).delete() throws '[path] "target" exists but is not a file!'
     * >>> File.of(""               ).delete() == false
-    * >>> File.of(null             ).delete() == false
     * <code></pre>
     *
     * @return false if path does not exist
@@ -154,7 +157,6 @@ class File {
     * >>> File.of("CHANGELOG.md").readAsBytes().length > 0
     * >>> File.of("nonexistent" ).readAsBytes() == null
     * >>> File.of(""            ).readAsBytes() == null
-    * >>> File.of(null          ).readAsBytes() == null
     * >>> File.of("."           ).readAsBytes() throws '[path] "." exists but is not a file!'
     * >>> File.of("src"         ).readAsBytes() throws '[path] "src" exists but is not a file!'
     * </code></pre>
@@ -163,7 +165,7 @@ class File {
     *
     * @throws if path is not a file
     */
-   public function readAsBytes():haxe.io.Bytes {
+   public function readAsBytes():Null<haxe.io.Bytes> {
       if (!path.exists())
          return null;
 
@@ -184,7 +186,6 @@ class File {
     * >>> File.of("CHANGELOG.md").readAsString().indexOf("Initial release") > -1 == true
     * >>> File.of("nonexistent" ).readAsString() == null
     * >>> File.of(""            ).readAsString() == null
-    * >>> File.of(null          ).readAsString() == null
     * >>> File.of("."           ).readAsString() throws '[path] "." exists but is not a file!'
     * >>> File.of("src"         ).readAsString() throws '[path] "src" exists but is not a file!'
     * </code></pre>
@@ -193,7 +194,7 @@ class File {
     *
     * @throws if path is not a file
     */
-   public function readAsString(?defaultValue:String = null):String {
+   public function readAsString(?defaultValue:String):Null<String> {
       if (!path.exists())
          return defaultValue;
 
@@ -222,18 +223,19 @@ class File {
     * >>> File.of("target/foo.txt").delete()                 == true
     * >>> File.of("target/bar.txt").delete()                 == true
     *
-    * >>> File.of("README.md"  ).copyTo("") throws "[newPath] must not be null or empty!"
-    * >>> File.of("nonexistent").copyTo("") throws '[path] "nonexistent" does not exist!'
-    * >>> File.of(""           ).copyTo("") throws "[path.filename] must not be null or empty!"
+    * >>> File.of("README.md"  ).copyTo(null) throws "[newPath] must not be null!"
+    * >>> File.of("README.md"  ).copyTo("")   throws "[newPath] must not be empty!"
+    * >>> File.of("nonexistent").copyTo("")   throws '[path] "nonexistent" does not exist!'
+    * >>> File.of(""           ).copyTo("")   throws "[path.filename] must not be empty!"
     * </code></pre>
     *
     * @return a File instance pointing to the copy target
     */
    public function copyTo(newPath:Either2<String, Path>, ?options:Array<FileCopyOption>):File {
-      assertValidPath();
-
       if (newPath == null)
-         throw "[newPath] must not be null or empty!";
+         throw "[newPath] must not be null!";
+
+      assertValidPath();
 
       var trimWhiteSpaces = true;
       var overwrite = false;
@@ -251,7 +253,7 @@ class File {
       }
 
       if (targetPath.filename == "")
-         throw "[newPath] must not be null or empty!";
+         throw "[newPath] must not be empty!";
 
       if (path.getAbsolutePath() == targetPath.getAbsolutePath())
          return this;
@@ -290,18 +292,19 @@ class File {
     * >>> File.of("target/foo.txt").path.exists()            == false
     * >>> File.of("target/bar.txt").path.exists()            == true
     *
-    * >>> File.of("target/bar.txt").moveTo("") throws "[newPath] must not be null or empty!"
-    * >>> File.of("target/bar.txt").delete()   == true
-    * >>> File.of(""              ).moveTo("") throws "[path.filename] must not be null or empty!"
+    * >>> File.of("target/bar.txt").moveTo(null) throws "[newPath] must not be null!"
+    * >>> File.of("target/bar.txt").moveTo("")   throws "[newPath] must not be empty!"
+    * >>> File.of("target/bar.txt").delete()     == true
+    * >>> File.of(""              ).moveTo("")   throws "[path.filename] must not be empty!"
     * </code></pre>
     *
     * @return a File instance pointing to the new location
     */
    public function moveTo(newPath:Either2<String, Path>, ?options:Array<FileMoveOption>):File {
-      assertValidPath();
-
       if (newPath == null)
-         throw "[newPath] must not be null or empty!";
+         throw "[newPath] must not be null!";
+
+      assertValidPath();
 
       var trimWhiteSpaces = true;
       var overwrite = false;
@@ -319,7 +322,7 @@ class File {
       }
 
       if (targetPath.filename == "")
-         throw "[newPath] must not be null or empty!";
+         throw "[newPath] must not be empty!";
 
       final targetFile = targetPath.toFile();
 
@@ -375,7 +378,7 @@ class File {
       if (newFileName.containsAny([Path.UnixPath.DIR_SEP, Path.WindowsPath.DIR_SEP]))
          throw '[newFileName] "$newFileName" must not contain directory separators!';
 
-      var opts:Array<FileMoveOption> = null;
+      var opts:Null<Array<FileMoveOption>> = null;
 
       if (options != null) for (o in options) {
          switch(o) {
@@ -386,6 +389,7 @@ class File {
       if (path.parent == null)
          return moveTo(newFileName, opts);
 
+      @:nullSafety(Off)
       return moveTo(path.parent.join(newFileName), opts);
    }
 
@@ -446,9 +450,6 @@ class File {
       if (path.exists() && !overwrite)
          throw '[path] "$path" already exists!';
 
-      if (content == null)
-         return;
-
       #if (sys || macro || nodejs)
          sys.io.File.saveBytes(path.toString(), content);
       #elseif phantomjs
@@ -465,7 +466,7 @@ class File {
     * >>> File.of("target/test.txt").readAsString().indexOf("HEY!") > -1 == true
     * >>> File.of("target/test.txt").writeString("HEY!", false)          throws '[path] "target' + Path.of("").dirSep + 'test.txt" already exists!'
     * >>> File.of("target/test.txt").delete()                            throws nothing
-    * >>> File.of(""               ).writeString("")                     throws "[path.filename] must not be null or empty!"
+    * >>> File.of(""               ).writeString("")                     throws "[path.filename] must not be empty!"
     * </code></pre>
     */
    public function writeString(content:String, overwrite = true):Void {
