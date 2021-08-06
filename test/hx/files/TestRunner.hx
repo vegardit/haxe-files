@@ -236,6 +236,9 @@ class TestRunner extends DocTestRunner {
                results.logFailures();
             }
 
+            #if python
+               Sys.sleep(5); // https://bugs.python.org/issue42717
+            #end
             final exitCode = results.testsFailed == 0 ? 0 : 1;
             hx.doctest.DocTestRunner.exit(exitCode);
          }
