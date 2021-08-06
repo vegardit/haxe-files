@@ -4,6 +4,7 @@
  */
 package hx.files;
 
+import hx.files.internal.OS;
 import hx.strings.internal.Either2;
 
 #if (sys || macro || nodejs)
@@ -70,11 +71,11 @@ class Dir {
          return Dir.of(python.lib.os.Path.expanduser("~"));
       #elseif (phantomjs && !macro)
          untyped __js__("var system = require('system');");
-         if (hx.strings.internal.OS.isWindows)
+         if (OS.isWindows)
             return Dir.of("" + untyped __js__("system.env['HOMEDRIVE']") + untyped __js__("system.env['HOMEPATH']"));
          return Dir.of("" + untyped __js__("system.env['HOME']"));
       #elseif (sys || nodejs)
-         if (hx.strings.internal.OS.isWindows)
+         if (OS.isWindows)
             #if nodejs @:nullSafety(Off) #end
             return Dir.of(Sys.getEnv("HOMEDRIVE") + Sys.getEnv("HOMEPATH"));
          #if nodejs @:nullSafety(Off) #end
@@ -420,23 +421,22 @@ class Dir {
       if (!path.exists())
          return [];
 
-      assertValidPath();
+      assertValidPath(false /*to prevent race conditions*/);
 
       var entries:Array<String>;
 
-      #if (sys || macro || nodejs)
+      #if (sys || macro || nodejs || phantomjs)
          try {
-            entries = FileSystem.readDirectory(path.toString());
+            #if (sys || macro || nodejs)
+               entries = FileSystem.readDirectory(path.toString());
+            #elseif phantomjs
+               entries = [ for (entry in js.phantomjs.FileSystem.list(path.toString())) if (entry != "." && entry != "..") entry ];
+            #end
          } catch (ex:Any) {
             // in case of race condition when directory is deleted during execution of this method
-            return [];
-         }
-      #elseif phantomjs
-         try {
-            entries = [ for (entry in js.phantomjs.FileSystem.list(path.toString())) if (entry != "." && entry != "..") entry ];
-         } catch (ex:Any) {
-            // in case of race condition when directory is deleted during execution of this method
-            return [];
+            if (!path.exists())
+               return [];
+            throw hx.strings.internal.Exception.capture(ex);
          }
       #else
          throw "Operation not supported on current target.";

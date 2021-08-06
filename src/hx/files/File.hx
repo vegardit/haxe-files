@@ -427,7 +427,7 @@ class File {
 
       #if (sys || macro || nodejs)
          if (path.exists()) {
-            if (hx.strings.internal.OS.isWindows) {
+            if (hx.files.internal.OS.isWindows) {
                Sys.command('copy /b "${path.toString()}"+,,'); // https://superuser.com/a/764721
             } else {
                Sys.command('touch "${path.toString()}"');

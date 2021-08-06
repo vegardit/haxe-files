@@ -4,6 +4,7 @@
  */
 package hx.files;
 
+import hx.files.internal.OS;
 import hx.strings.Char;
 import hx.strings.StringBuilder;
 import hx.strings.collection.StringArray;
@@ -23,7 +24,7 @@ class Path {
     * @param trimWhiteSpaces controls if leading/trailing whitespaces of path elements shall be removed automatically
     */
    public static function of(path:String, trimWhiteSpaces = true):Path {
-      if(hx.strings.internal.OS.isWindows)
+      if(OS.isWindows)
          return Path.win(path, trimWhiteSpaces);
       return Path.unix(path, trimWhiteSpaces);
    }
@@ -928,6 +929,7 @@ class Path {
 
    function newPathForChild(filename:String):Path
       throw "Not implemented";
+
 }
 
 
@@ -1004,7 +1006,7 @@ class UnixPath extends Path {
          throw "[path] must not be null";
 
       super(parent, path, DIR_SEP, ":");
-      isLocal = !hx.strings.internal.OS.isWindows;
+      isLocal = !OS.isWindows;
       isUnix = true;
       isWindows = false;
    }
@@ -1195,7 +1197,7 @@ class WindowsPath extends Path {
          throw "[path] must not be null";
 
       super(parent, path, DIR_SEP, ";");
-      isLocal = hx.strings.internal.OS.isWindows;
+      isLocal = OS.isWindows;
       this.isUnix = false;
       this.isWindows = true;
    }

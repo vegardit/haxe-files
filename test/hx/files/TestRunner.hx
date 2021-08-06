@@ -10,11 +10,11 @@ import hx.concurrent.executor.Executor;
 import hx.concurrent.internal.Dates;
 import hx.concurrent.lock.RLock;
 import hx.doctest.DocTestRunner;
+import hx.files.internal.OS;
 #if filesystem_support
 import hx.files.watcher.FileWatcher.FileSystemEvent;
 import hx.files.watcher.PollingFileWatcher;
 #end
-import hx.strings.internal.OS;
 
 /**
  * @author Sebastian Thomschke, Vegard IT GmbH
@@ -46,6 +46,11 @@ class TestRunner extends DocTestRunner {
 
    #if java
    public function testJavaFileWatcher():Void {
+      if (OS.isMacOS) {
+         trace("Skippping test of JavaFileWatcher on MacOS.");
+         return;
+      }
+
       var ex = Executor.create();
       var fw = new hx.files.watcher.JavaFileWatcher(ex);
 
@@ -73,7 +78,7 @@ class TestRunner extends DocTestRunner {
       Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().writeString("123");
       Sys.sleep(0.2); dir.path.join(OS.isWindows ? "foo/test.txt" : "text.txt").toFile().appendString("456");
       Sys.sleep(0.2); dir.path.join("foo").toDir().delete(true);
-      Sys.sleep(0.2);
+      Sys.sleep(0.6);
 
       trace(events);
       assertEquals(Lambda.count(events, e -> e.match(DIR_CREATED(_))), 1);
@@ -87,7 +92,7 @@ class TestRunner extends DocTestRunner {
       events = new Array<FileSystemEvent>();
       Sys.sleep(0.2); dir.path.join("foo").toDir().create();
       Sys.sleep(0.2); dir.path.join("test.txt").toFile().writeString("123");
-      Sys.sleep(0.2);
+      Sys.sleep(0.6);
 
       assertEquals(events.length, 0);
 
@@ -217,7 +222,7 @@ class TestRunner extends DocTestRunner {
       final startTime = Dates.now();
       run(expectedMinNumberOfTests, true, false);
 
-      final t = new haxe.Timer(100);
+      final t = new haxe.Timer(1000);
       t.run = function() {
          if(_asyncTests.value == 0) {
             t.stop();

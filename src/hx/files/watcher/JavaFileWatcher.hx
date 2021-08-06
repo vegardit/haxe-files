@@ -16,11 +16,12 @@ import hx.files.internal.externs.java.nio.file.StandardWatchEventKinds;
 import hx.files.internal.externs.java.nio.file.WatchService;
 import hx.files.internal.externs.java.nio.file.WatchEvent;
 import hx.files.internal.externs.java.nio.file.WatchKey;
+import hx.files.internal.OS;
 import hx.strings.internal.Either2;
 import hx.strings.collection.SortedStringMap;
 import hx.strings.collection.StringArray;
 import hx.strings.collection.StringMap;
-import hx.strings.internal.OS;
+
 
 using hx.strings.Strings;
 
@@ -33,6 +34,7 @@ typedef JPath = hx.files.internal.externs.java.nio.file.Path;
  * a) Only directories, not single files directly can be watched.
  * b) The directory to watch must exist.
  * c) Recursive watching (sub-directories) only works on Windows. See https://stackoverflow.com/questions/18701242/how-to-watch-a-folder-and-subfolders-for-changes
+ * d) Does not support MacOS
  *
  * @author Sebastian Thomschke, Vegard IT GmbH
  */
@@ -50,6 +52,9 @@ class JavaFileWatcher extends AbstractFileWatcher {
      * @param intervalMS polling interval in milliseconds
      */
    public function new(executor:Executor, autostart = true) {
+      if (OS.isMacOS)
+         throw "MacOS is not supported by java.nio.file.WatchService";
+
       super(executor);
 
       if (autostart)
