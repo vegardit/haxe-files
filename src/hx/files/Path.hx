@@ -419,12 +419,13 @@ class Path {
    public function stat():Null<sys.FileStat> {
       if (!exists())
          return null;
+
       try {
          return sys.FileSystem.stat(toString());
-      } catch (e:Dynamic) {
-         if (!exists())
+      } catch (ex:Any) {
+         if (!exists()) // in case of race condition
             return null;
-         final ex = hx.concurrent.ConcurrentException.capture(e);
+         final ex = hx.concurrent.ConcurrentException.capture(ex);
          ex.rethrow();
          return null; // never reached
       }

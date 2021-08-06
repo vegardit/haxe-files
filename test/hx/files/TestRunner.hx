@@ -107,7 +107,7 @@ class TestRunner extends DocTestRunner {
    #if filesystem_support
    public function testPollingFileWatcher_SingleFile():Void {
       var ex = Executor.create();
-      var fw = new PollingFileWatcher(ex, 100);
+      var fw = new PollingFileWatcher(ex, 200);
 
       var events = new Array<FileSystemEvent>();
       fw.subscribe(function (event) {
@@ -127,11 +127,11 @@ class TestRunner extends DocTestRunner {
       file.delete();
       fw.watch(file.path);
 
-      _later( 100, function() { file.writeString("123");    trace("-> create: "  + file ); });
-      _later( 600, function() { file.appendString("456");   trace("-> append: "  + file ); });
-      _later(1800, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
-      _later(2000, function() { file.delete();              trace("-> delete: "  + file ); });
-      _later(3000, function() {
+      _later(1000, function() { file.writeString("123");    trace("-> create: "  + file ); });
+      _later(2000, function() { file.appendString("456");   trace("-> append: "  + file ); });
+      _later(3000, function() { file.writeString("12345_"); trace("-> replace: " + file ); }); // using larger delay because some FileSystems (ext3) and/or targets (e.g. HL) do not support ms-precision of mtime
+      _later(4000, function() { file.delete();              trace("-> delete: "  + file ); });
+      _later(5000, function() {
          fw.stop();
          ex.stop();
 
@@ -145,7 +145,7 @@ class TestRunner extends DocTestRunner {
 
    public function testPollingFileWatcher_DirTree():Void {
       var ex = Executor.create();
-      var fw = new PollingFileWatcher(ex, 100);
+      var fw = new PollingFileWatcher(ex, 200);
 
       var events = new Array<FileSystemEvent>();
       fw.subscribe(function (event) {
@@ -168,15 +168,15 @@ class TestRunner extends DocTestRunner {
 
       fw.watch(dir.path);
 
-      _later(50, function() {
+      _later(100, function() {
          dir.create();
          subdir.create();
          file.writeString("123");
       });
-      _later( 400, function() { file.appendString("456"); trace("-> append: "  + file  ); });
-      _later(1500, function() { subdir.delete(true);      trace("-> delete: "  + subdir); });
-      _later(1800, function() { dir.delete(true);         trace("-> delete: "  + dir   ); });
-      _later(2200, function() {
+      _later(1000, function() { file.appendString("456"); trace("-> append: "  + file  ); });
+      _later(2000, function() { subdir.delete(true);      trace("-> delete: "  + subdir); });
+      _later(3000, function() { dir.delete(true);         trace("-> delete: "  + dir   ); });
+      _later(4000, function() {
          fw.stop();
          ex.stop();
 
