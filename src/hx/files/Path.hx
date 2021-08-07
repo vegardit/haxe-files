@@ -16,6 +16,7 @@ using hx.strings.Strings;
  * @author Sebastian Thomschke, Vegard IT GmbH
  */
 @immutable
+#if (haxe_ver >= 4.2) abstract #end
 class Path {
 
    /**
