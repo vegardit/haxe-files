@@ -27,7 +27,7 @@ jobs:
         #- macos-latest # too many random fails
         - windows-latest
         haxe:
-        - 4.2.4
+        - 4.2.5
         - 4.1.5
         - 4.0.5
 
@@ -40,7 +40,7 @@ jobs:
       uses: actions/checkout@v3 #https://github.com/actions/checkout
 
     - name: "Cache: Haxelib Repository"
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: $RUNNER_TOOL_CACHE/haxe/${{ matrix.haxe }}/x64/lib
         # https://github.com/actions/cache/issues/342#issuecomment-673371329
@@ -66,7 +66,7 @@ jobs:
     - name: "Install: Python 3"
       uses: actions/setup-python@v3 # https://github.com/actions/setup-python
       with:
-        python-version: 3.9
+        python-version: "3.10"
 
     - name: Configure Python 3 on Windows
       if: runner.os == 'Windows'
