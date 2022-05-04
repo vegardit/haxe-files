@@ -26,8 +26,8 @@ class OS {
          #else
             Sys.systemName()
          #end;
-      #if python @:nullSafety(Off) #end // TODO https://github.com/HaxeFoundation/haxe/issues/10273
-      ~/mac/i.match(os);
+      #if python @:nullSafety(Off) #end // TODO https://github.com/HaxeFoundation/haxe/issues/10273  
+      ~/^mac|^darwin/i.match(os);
    }
 
    public static var isWindows(default, never):Bool = {
@@ -40,6 +40,6 @@ class OS {
             Sys.systemName()
          #end;
       #if python @:nullSafety(Off) #end // TODO https://github.com/HaxeFoundation/haxe/issues/10273
-      ~/win/i.match(os);
+      ~/^win/i.match(os);
    }
 }
