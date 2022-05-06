@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+### Changed
+- minimum required Haxe version is now 4.2
+
+
 ## [3.0.0] - 2021-08-07
 
 ### Fixed

@@ -28,8 +28,6 @@ jobs:
         - windows-latest
         haxe:
         - 4.2.5
-        - 4.1.5
-        - 4.0.5
 
     steps:
     - name: Show environment variables
@@ -123,7 +121,6 @@ jobs:
         haxelib run travix java
 
     - name: Test [jvm]
-      continue-on-error: ${{ matrix.haxe == '4.0.5' }} # Caused by: java.lang.ClassFormatError: Illegal class name "[Ljava/nio/file/WatchEvent"
       run: haxelib run travix java -D jvm
 
     - name: Test [lua]
