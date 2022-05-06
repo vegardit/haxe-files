@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [4.0.0] - 2022-05-06
+
+### Fixed
+- [#10](https://github.com/vegardit/haxe-files/pull/10) Windows/MacOS platform detection (thanks to [redchew](https://github.com/redchew))
+
 ### Changed
 - minimum required Haxe version is now 4.2
 
