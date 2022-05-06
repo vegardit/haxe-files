@@ -13,7 +13,6 @@ import sys.io.FileOutput;
 #end
 
 #if (sys || macro || nodejs)
-import sys.FileStat;
 import sys.FileSystem;
 #end
 
