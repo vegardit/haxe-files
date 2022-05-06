@@ -1,11 +1,10 @@
 /*
- * Copyright (c) 2016-2021 Vegard IT GmbH (https://vegardit.com) and contributors.
+ * Copyright (c) 2016-2022 Vegard IT GmbH (https://vegardit.com) and contributors.
  * SPDX-License-Identifier: Apache-2.0
  */
 package hx.files.watcher;
 
 import hx.concurrent.executor.Executor;
-import hx.concurrent.executor.Schedule;
 import hx.concurrent.lock.RLock;
 import hx.files.watcher.FileWatcher;
 import hx.strings.collection.SortedStringMap;
@@ -102,9 +101,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
 
 
    private function scanAll():Void {
-      final paths:StringArray = watchedSync.execute(function() {
-         return [ for (k in watched.keys()) k ];
-      });
+      final paths:StringArray = watchedSync.execute(() -> [ for (k in watched.keys()) k ]);
 
       for (path in paths) {
          watchedSync.execute(function() {

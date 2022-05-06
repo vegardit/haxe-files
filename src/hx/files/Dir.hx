@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Vegard IT GmbH (https://vegardit.com) and contributors.
+ * Copyright (c) 2016-2022 Vegard IT GmbH (https://vegardit.com) and contributors.
  * SPDX-License-Identifier: Apache-2.0
  */
 package hx.files;
@@ -318,8 +318,8 @@ class Dir {
       #elseif (sys || nodejs)
          final dirs:Array<Dir> = [];
          walk(
-            function(file) file.delete(),
-            function(dir) { dirs.push(dir); return true; }
+            file -> file.delete(),
+            dir  -> { dirs.push(dir); return true; }
          );
          dirs.reverse();
          dirs.push(this);
@@ -381,7 +381,7 @@ class Dir {
     */
    public function findDirs(globPattern:String):Array<Dir> {
       final dirs = new Array<Dir>();
-      find(globPattern, null, function(dir) dirs.push(dir));
+      find(globPattern, null, dir -> dirs.push(dir));
       return dirs;
    }
 
@@ -401,7 +401,7 @@ class Dir {
     */
    public function findFiles(globPattern:String):Array<File> {
       final files = new Array<File>();
-      find(globPattern, function(file) files.push(file), null);
+      find(globPattern, file -> files.push(file), null);
       return files;
    }
 
@@ -626,9 +626,9 @@ class Dir {
 
    /**
     * <pre><code>
-    * >>> Dir.of("." ).walk(function (file) {}, function (dir) return true) throws nothing
-    * >>> Dir.of("." ).walk(function (file) {})                             throws nothing
-    * >>> Dir.of("." ).walk(null)                                           throws nothing
+    * >>> Dir.of("." ).walk(file -> {}, dir -> true) throws nothing
+    * >>> Dir.of("." ).walk(file -> {})              throws nothing
+    * >>> Dir.of("." ).walk(null)                    throws nothing
     * </code></pre>
     *
     * @param onFile callback function that is invoked on each found file
