@@ -479,7 +479,16 @@ class File {
          return;
 
       #if (sys || macro || nodejs)
+         #if (flash || openfl)
+         var path:String = haxe.io.Path.directory(path.toString());
+         if (!FileSystem.exists(path))
+            FileSystem.createDirectory(path);
+         var output = sys.io.File.write(path.toString(), false);
+         output.writeString(content);
+			output.close();
+         #else
          sys.io.File.saveContent(path.toString(), content);
+         #end
       #elseif phantomjs
          js.phantomjs.FileSystem.write(path.toString(), content, "w");
       #else
