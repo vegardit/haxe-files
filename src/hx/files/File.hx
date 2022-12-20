@@ -479,7 +479,19 @@ class File {
          return;
 
       #if (sys || macro || nodejs)
+         #if (flash || openfl)
+         //before writing a string, make sure path's parent exists.
+         //if it doesn't, it needs to be created to write the content for OpenFL and AIR/Flash.
+         var dir:String = haxe.io.Path.directory(path.toString());
+         if (!FileSystem.exists(dir))
+            FileSystem.createDirectory(dir);
+         var output = sys.io.File.write(path.toString(), false);
+         output.writeString(content);
+         output.close();
+         #else
+         //on other targets, this check is unnecessary.
          sys.io.File.saveContent(path.toString(), content);
+         #end
       #elseif phantomjs
          js.phantomjs.FileSystem.write(path.toString(), content, "w");
       #else
