@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016-2021 Vegard IT GmbH (https://vegardit.com) and contributors.
+ * SPDX-FileCopyrightText: © Vegard IT GmbH (https://vegardit.com) and contributors
+ * SPDX-FileContributor: Sebastian Thomschke, Vegard IT GmbH
  * SPDX-License-Identifier: Apache-2.0
  */
 package hx.files.watcher;
@@ -13,9 +14,6 @@ import hx.strings.internal.Either2;
 
 #if (filesystem_support || macro)
 
-/**
- * @author Sebastian Thomschke, Vegard IT GmbH
- */
 interface FileWatcher extends EventListenable<FileSystemEvent> extends Service<Int> {
 
    function watch(path:Either2<Path, String>):Void;

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016-2021 Vegard IT GmbH (https://vegardit.com) and contributors.
+ * SPDX-FileCopyrightText: © Vegard IT GmbH (https://vegardit.com) and contributors
+ * SPDX-FileContributor: Sebastian Thomschke, Vegard IT GmbH
  * SPDX-License-Identifier: Apache-2.0
  */
 package hx.files;
@@ -16,9 +17,6 @@ import hx.files.watcher.FileWatcher.FileSystemEvent;
 import hx.files.watcher.PollingFileWatcher;
 #end
 
-/**
- * @author Sebastian Thomschke, Vegard IT GmbH
- */
 @:build(hx.doctest.DocTestGenerator.generateDocTests())
 @:keep // prevent DCEing of manually created testXYZ() methods
 class TestRunner extends DocTestRunner {

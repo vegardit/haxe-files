@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016-2021 Vegard IT GmbH (https://vegardit.com) and contributors.
+ * SPDX-FileCopyrightText: © Vegard IT GmbH (https://vegardit.com) and contributors
+ * SPDX-FileContributor: Sebastian Thomschke, Vegard IT GmbH
  * SPDX-License-Identifier: Apache-2.0
  */
 package hx.files.watcher;
@@ -35,8 +36,6 @@ typedef JPath = hx.files.internal.externs.java.nio.file.Path;
  * b) The directory to watch must exist.
  * c) Recursive watching (sub-directories) only works on Windows. See https://stackoverflow.com/questions/18701242/how-to-watch-a-folder-and-subfolders-for-changes
  * d) Does not support MacOS
- *
- * @author Sebastian Thomschke, Vegard IT GmbH
  */
 class JavaFileWatcher extends AbstractFileWatcher {
 
