@@ -150,7 +150,7 @@ class Dir {
       #if lua
          // workaround for https://github.com/HaxeFoundation/haxe/issues/6946
          final parts = [ path ];
-         final _p = path;
+         var _p = path;
          while ((_p = _p.parent) != null) {
             if (_p.isRoot)
                break;
