@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [4.0.1] - 2023-01-14
+
+### Fixed
+- Lua support
+- [#13](https://github.com/vegardit/haxe-files/pull/13) File.writeString fails with Flash/AIR (thanks to [Tahir](https://github.com/TheWorldMachinima))
+
+
 ## [4.0.0] - 2022-05-06
 
 ### Fixed
