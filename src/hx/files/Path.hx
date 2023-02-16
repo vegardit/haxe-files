@@ -254,9 +254,15 @@ abstract class Path {
          php.Syntax.code("clearstatcache({0})", path);
       #end
 
-      #if lua
-         // workaround for https://github.com/HaxeFoundation/haxe/issues/6946
-         return lua.lib.luv.fs.FileSystem.stat(path).result != null;
+      #if hl
+         if (OS.isMacOS) { // workaround for https://github.com/HaxeFoundation/haxe/issues/10970
+            try { 
+               sys.FileSystem.stat(path);
+               return true;
+            } catch (e) 
+               return false;
+         }
+         return sys.FileSystem.exists(path);
       #elseif (sys || macro || nodejs)
          return sys.FileSystem.exists(path);
       #elseif phantomjs
