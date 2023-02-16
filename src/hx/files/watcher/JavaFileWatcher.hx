@@ -61,7 +61,7 @@ class JavaFileWatcher extends AbstractFileWatcher {
    }
 
 
-   override
+   override //
    public function onStart():Void {
       watchService = FileSystems.getDefault().newWatchService();
 
@@ -74,7 +74,7 @@ class JavaFileWatcher extends AbstractFileWatcher {
    }
 
 
-   override
+   override //
    public function onStop():Void {
       @:nullSafety(Off)
       watchService.close();
@@ -124,7 +124,7 @@ class JavaFileWatcher extends AbstractFileWatcher {
    /**
      * @param path must point to an existing directory
      */
-   override
+   override //
    public function watch(path:Either2<Path, String>):Void {
       if (path == null)
          throw "[path] must not be null";
@@ -164,14 +164,14 @@ class JavaFileWatcher extends AbstractFileWatcher {
    }
 
 
-   override
+   override //
    public function unwatch(path:Either2<Path, String>):Void {
       if (path == null)
          return;
 
       watchedSync.execute(function() {
          final pathStr = (
-            switch(path.value) {
+            switch (path.value) {
                case a(obj): obj;
                case b(str): Path.of(str);
             }
@@ -197,7 +197,7 @@ private final class WatchEntry {
    public final path:Path;
    public var watchKey:WatchKey;
 
-   inline
+   inline //
    public function new(jpath:JPath, path:Path, watchKey:WatchKey) {
       this.jpath = jpath;
       this.path = path;

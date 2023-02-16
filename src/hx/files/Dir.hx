@@ -109,10 +109,11 @@ class Dir {
    public final path:Path;
 
 
-   inline
+   inline //
    function new(path:Path) {
       this.path = path;
    }
+
 
    #if (filesystem_support || macro)
 
@@ -633,7 +634,7 @@ class Dir {
     * @param onFile callback function that is invoked on each found file
     * @param onDir callback function that is invoked on each found directory, if returns false, traversing stops
     */
-   public function walk(onFile:Null<File -> Void>, ?onDir:Dir -> Bool):Void {
+   public function walk(onFile:Null<File->Void>, ?onDir:Dir->Bool):Void {
       var nodes:Array<Path> = list();
       while (nodes.length > 0) {
          @:nullSafety(Off)
@@ -651,7 +652,7 @@ class Dir {
 
    #end // filesystem_support
 
-   inline
+   inline //
    public function toString():String
       return path.toStringWithTrailingSeparator();
 }

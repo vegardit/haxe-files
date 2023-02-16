@@ -63,7 +63,7 @@ class DirAttrs {
       #end
    }
 
-   inline
+   inline //
    public function new(mtime:Float, uid:Int, gid:Int, mode:Int) {
       this.mtime = mtime;
       this.uid = uid;
@@ -71,7 +71,7 @@ class DirAttrs {
       this.mode = mode;
    }
 
-   inline
+   inline //
    public function equals(attrs:DirAttrs):Bool {
       return attrs.mtime == mtime && attrs.uid  == uid && attrs.gid  == gid && attrs.mode == mode;
    }
@@ -97,7 +97,8 @@ class FileAttrs {
       #end
    }
 
-   inline
+
+   inline //
    public function new(mtime:Float, uid:Int, gid:Int, mode:Int, size:Int) {
       this.mtime = mtime;
       this.uid = uid;
@@ -106,7 +107,8 @@ class FileAttrs {
       this.size = size;
    }
 
-   inline
+
+   inline //
    public function equals(attrs:FileAttrs):Bool
       return attrs.mtime == mtime && attrs.size == size && attrs.uid  == uid && attrs.gid  == gid && attrs.mode == mode;
 }

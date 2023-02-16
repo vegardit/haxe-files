@@ -20,19 +20,19 @@ class Macros {
       #end
    };
 
-   macro
+   macro //
    public static function addDefines() {
       final def = Context.getDefines();
-      if (def.exists("cpp") ||
-          def.exists("cs") ||
-          def.exists("hl") ||
-          def.exists("eval") ||
-          def.exists("java") ||
-          def.exists("lua") ||
-          def.exists("neko") ||
-          def.exists("nodejs") ||
-          def.exists("phantomjs") ||
-          def.exists("php") ||
+      if (def.exists("cpp") || //
+          def.exists("cs") || //
+          def.exists("hl") || //
+          def.exists("eval") || //
+          def.exists("java") || //
+          def.exists("lua") || //
+          def.exists("neko") || //
+          def.exists("nodejs") || //
+          def.exists("phantomjs") || //
+          def.exists("php") || //
           def.exists("python")
       ) {
          trace("[INFO] Setting compiler define 'filesystem_support'.");
@@ -48,7 +48,7 @@ class Macros {
       return macro {}
    }
 
-   macro
+   macro //
    public static function configureNullSafety() {
       haxe.macro.Compiler.nullSafety("hx.concurrent", StrictThreaded);
       return macro {}

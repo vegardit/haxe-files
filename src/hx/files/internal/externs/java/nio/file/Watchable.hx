@@ -6,5 +6,6 @@ import java.NativeArray;
 extern interface Watchable {
 
    @:throws("java.io.IOException")
-   function register(arg0:WatchService, arg1:NativeArray<WatchEvent.WatchEvent_Kind>, arg2:NativeArray<WatchEvent.WatchEvent_Modifier>):WatchKey;
+   function register(arg0:WatchService, arg1:NativeArray<WatchEvent.WatchEvent_Kind>,
+      arg2:NativeArray<WatchEvent.WatchEvent_Modifier>):WatchKey;
 }

@@ -41,13 +41,13 @@ class PollingFileWatcher extends AbstractFileWatcher {
    }
 
 
-   override
+   override //
    public function onStart():Void {
       scanTask = executor.submit(this.scanAll, Schedule.FIXED_DELAY(intervalMS, 0));
    }
 
 
-   override
+   override //
    public function onStop():Void {
       @:nullSafety(Off)
       scanTask.cancel();
@@ -55,7 +55,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
    }
 
 
-   override
+   override //
    public function watch(path:Either2<Path, String>):Void {
       if (path == null)
          throw "[path] must not be null";
@@ -79,14 +79,14 @@ class PollingFileWatcher extends AbstractFileWatcher {
    }
 
 
-   override
+   override //
    public function unwatch(path:Either2<Path, String>):Void {
       if (path == null)
          return;
 
       watchedSync.execute(function() {
          final pathStr = (
-            switch(path.value) {
+            switch (path.value) {
                case a(obj): obj;
                case b(str): Path.of(str);
             }
@@ -292,7 +292,7 @@ class PollingFileWatcher extends AbstractFileWatcher {
    }
 
 
-   inline
+   inline //
    private function createFSEntry_FILE(file:File):FSEntry
       return file.path.exists()
          ? FSEntry.FILE(file, FileAttrs.fromFile(file))

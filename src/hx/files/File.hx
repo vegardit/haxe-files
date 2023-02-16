@@ -47,13 +47,12 @@ class File {
    public final path:Path;
 
 
-   inline
+   inline //
    private function new(path:Path) {
       this.path = path;
    }
 
    #if (filesystem_support || macro)
-
    function assertValidPath(mustExist = true) {
       if (path.filename.isEmpty())
          throw "[path.filename] must not be empty!";
@@ -503,7 +502,7 @@ class File {
    /**
      * @return the file's path
      */
-   inline
+   inline //
    public function toString():String
       return path.toString();
 }
