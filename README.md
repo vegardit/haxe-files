@@ -251,6 +251,8 @@ class MyClass {
    }
 }
 ```
+
+
 ## <a name="installation"></a>Installation
 
 1. install the library via haxelib using the command:
