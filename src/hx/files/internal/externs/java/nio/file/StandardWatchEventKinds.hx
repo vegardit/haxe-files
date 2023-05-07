@@ -3,10 +3,10 @@ package hx.files.internal.externs.java.nio.file;
 @:native("java.nio.file.StandardWatchEventKinds")
 extern class StandardWatchEventKinds {
 
-   @:final public static var OVERFLOW:WatchEvent.WatchEvent_Kind;
-   @:final public static var ENTRY_CREATE:WatchEvent.WatchEvent_Kind;
-   @:final public static var ENTRY_DELETE:WatchEvent.WatchEvent_Kind;
-   @:final public static var ENTRY_MODIFY:WatchEvent.WatchEvent_Kind;
+   public static final OVERFLOW:WatchEvent.WatchEvent_Kind;
+   public static final ENTRY_CREATE:WatchEvent.WatchEvent_Kind;
+   public static final ENTRY_DELETE:WatchEvent.WatchEvent_Kind;
+   public static final ENTRY_MODIFY:WatchEvent.WatchEvent_Kind;
 
 }
 
