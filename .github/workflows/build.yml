@@ -87,3 +87,5 @@ jobs:
       test-node:   ${{ inputs.test-target == '' || inputs.test-target == 'node' }}
       test-php:    ${{ inputs.test-target == '' || inputs.test-target == 'php' }}
       test-python: ${{ inputs.test-target == '' || inputs.test-target == 'python' }}
+
+      allow-failure: ${{ matrix.haxe == 'nightly' }}
