@@ -28,6 +28,7 @@ class Macros {
           def.exists("hl") || //
           def.exists("eval") || //
           def.exists("java") || //
+          def.exists("jvm") || //
           def.exists("lua") || //
           def.exists("neko") || //
           def.exists("nodejs") || //
