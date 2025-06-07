@@ -25,6 +25,10 @@ _LOCAL/
 *.swo
 *.swp
 
+# patch
+*.orig
+*.rej
+
 # Temp files
 .history
 *.tmp
