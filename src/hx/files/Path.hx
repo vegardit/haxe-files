@@ -404,7 +404,8 @@ abstract class Path {
       final path = toString();
 
       #if (sys || macro || nodejs)
-         return sys.FileSystem.absolutePath(path);
+         final absPath = sys.FileSystem.absolutePath(path);
+         return isWindows ? absPath.replaceAll(UnixPath.DIR_SEP, dirSep) : absPath;
       #elseif phantomjs
          return js.phantomjs.FileSystem.absolute(path);
       #else
