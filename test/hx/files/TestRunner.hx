@@ -45,7 +45,7 @@ class TestRunner extends DocTestRunner {
    #if java
    public function testJavaFileWatcher():Void {
       if (OS.isMacOS) {
-         trace("Skippping test of JavaFileWatcher on MacOS.");
+         trace("Skipping test of JavaFileWatcher on MacOS.");
          return;
       }
 
