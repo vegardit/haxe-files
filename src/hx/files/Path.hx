@@ -11,6 +11,10 @@ import hx.strings.StringBuilder;
 import hx.strings.collection.StringArray;
 import hx.strings.internal.Either2;
 
+#if lua
+import lua.lib.luv.fs.FileSystem as LuvFS;
+#end
+
 using hx.strings.Strings;
 
 @immutable
@@ -448,6 +452,7 @@ abstract class Path {
     * >>> Path.of("."           ).getModificationTime() > 0
     * >>> Path.of(""            ).getModificationTime() == -1
     * >>> Path.of("non-existing").getModificationTime() == -1
+    * >>> Path.of("README.md").getModificationTime() != Path.of("../..").getModificationTime()
     * <code></pre>
     *
     * @return -1 if path does not exist
@@ -464,6 +469,12 @@ abstract class Path {
          #if python
             // workaround to get ms precision
             return 1000 * python.lib.Os.stat(path).st_mtime;
+         #elseif lua
+            // workaround for haxe bug https://github.com/HaxeFoundation/haxe/pull/12389
+            final st = LuvFS.stat(path);
+            if (st.result == null) return -1;
+            final mtime = st.result.mtime == null ? st.result.ctime : st.result.mtime;
+            return mtime.sec * 1000 + mtime.nsec / 1000000;
          #else
             final stat = sys.FileSystem.stat(path);
             return stat.mtime == null ? stat.ctime.getTime() : stat.mtime.getTime();
