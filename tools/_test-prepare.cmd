@@ -29,8 +29,6 @@ for %%i in (haxe-doctest haxe-concurrent haxe-strings) do (
    )
 )
 
-goto :eof
-
 REM install additional libs
 :iterate
 

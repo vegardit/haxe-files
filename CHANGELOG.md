@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Path.getAbsolutePath() returns path with forward-slahses on Windows
+
 ## [4.0.4] - 2025-06-07
 
 ### Changed
