@@ -5,7 +5,6 @@
  */
 package hx.files;
 
-import haxe.EnumTools;
 import hx.concurrent.atomic.AtomicInt;
 import hx.concurrent.executor.Executor;
 import hx.concurrent.internal.Dates;
@@ -78,12 +77,20 @@ class TestRunner extends DocTestRunner {
       Sys.sleep(0.2); dir.path.join("foo").toDir().delete(true);
       Sys.sleep(0.6);
 
-      trace(events);
       assertEquals(Lambda.count(events, e -> e.match(DIR_CREATED(_))), 1);
       assertEquals(Lambda.count(events, e -> e.match(DIR_DELETED(_))), 1);
       assertEquals(Lambda.count(events, e -> e.match(FILE_CREATED(_))), 1);
       assertMin(Lambda.count(events, e -> e.match(FILE_MODIFIED(_))), 2);
       assertEquals(Lambda.count(events, e -> e.match(FILE_DELETED(_))), 0);
+
+      // deleting a standalone file must emit FILE_DELETED
+      events = new Array<FileSystemEvent>();
+      var singleFile = dir.path.join(OS.isWindows ? "test2.txt" : "single.txt").toFile();
+      Sys.sleep(0.2); singleFile.writeString("123");
+      Sys.sleep(0.4); singleFile.appendString("456");
+      Sys.sleep(0.4); singleFile.delete();
+      Sys.sleep(0.8);
+      assertEquals(Lambda.count(events, e -> e.match(FILE_DELETED(_))), 1);
 
       fw.unwatch(dir.path);
 
@@ -133,7 +140,6 @@ class TestRunner extends DocTestRunner {
          fw.stop();
          ex.stop();
 
-         trace(events);
          assertEquals(Lambda.count(events, e -> e.match(FILE_CREATED(_))), 1);
          assertMin(Lambda.count(events, e -> e.match(FILE_MODIFIED(_))), 2);
          assertEquals(Lambda.count(events, e -> e.match(FILE_DELETED(_))), 1);
@@ -178,7 +184,6 @@ class TestRunner extends DocTestRunner {
          fw.stop();
          ex.stop();
 
-         trace(events);
          assertEquals(Lambda.count(events, e -> e.match(DIR_CREATED(_))), 3);
          assertEquals(Lambda.count(events, e -> e.match(DIR_DELETED(_))), 3);
          assertEquals(Lambda.count(events, e -> e.match(FILE_CREATED(_))), 1);

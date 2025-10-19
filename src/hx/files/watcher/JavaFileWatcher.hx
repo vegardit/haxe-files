@@ -85,12 +85,34 @@ class JavaFileWatcher extends AbstractFileWatcher {
    function pollEvents() {
       watchedSync.execute(function() {
          for (entry in watched) {
+            // Build a simple list of (kind, rel) pairs and pre-collect deleted directories
+            final items = new Array<{kind:String, relPath:String}>();
+            final deletedDirs = new StringArray();
+
             final events = entry.watchKey.pollEvents().iterator();
             while (events.hasNext()) {
                final event:WatchEvent = events.next();
                final relPath = Std.string(event.context());
+               final kind = event.kind().name();
+               items.push({ kind: kind, relPath: relPath });
+               if (kind == "ENTRY_DELETE" && entry.existingDirs.contains(relPath)) {
+                  deletedDirs.push(relPath);
+               }
+            }
+
+            function isUnderDeletedDir(rel:String):Bool {
+               for (d in deletedDirs) {
+                  if (rel == d) return true;
+                  if (rel.startsWith(d + entry.path.dirSep)) return true;
+               }
+               return false;
+            }
+
+            // Process with knowledge of deleted directories in this cycle
+            for (item in items) {
+               final relPath = item.relPath;
                final path = entry.path.join(relPath);
-               switch(event.kind().name()) {
+               switch(item.kind) {
                   case "ENTRY_CREATE":
                      if (path.isDirectory()) {
                         entry.existingDirs.push(relPath);
@@ -108,13 +130,22 @@ class JavaFileWatcher extends AbstractFileWatcher {
                      if (entry.existingDirs.contains(relPath)) {
                         entry.existingDirs.remove(relPath);
                         eventDispatcher.fire(FileSystemEvent.DIR_DELETED(path.toDir()));
-                     } else if (path.isFile()) {
+                     } else if (isUnderDeletedDir(relPath)) {
+                        // part of a directory deletion in this cycle -> suppress FILE_DELETED
+                     } else {
                         eventDispatcher.fire(FileSystemEvent.FILE_DELETED(path.toFile()));
                      }
                   }
                   default:
-                      trace('[ERROR] Unexpected WatchEvent type: ${event.kind().name()}');
+                     trace('[ERROR] Unexpected WatchEvent type: ${item.kind}');
                }
+            }
+
+            // Ensure the key is ready to receive further events
+            try {
+               entry.watchKey.reset();
+            } catch (e:Dynamic) {
+               // ignore
             }
          }
       });
