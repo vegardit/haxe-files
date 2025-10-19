@@ -11,7 +11,7 @@
    "description": "A haxelib for consistent cross-platform filesystem operations and proper Windows-/Unix-style path handling. Supports wildcard file searches (globbing).",
    "contributors": ["vegardit"],
    "releasenote": "See https://github.com/vegardit/haxe-files/blob/master/CHANGELOG.md",
-   "version": "4.0.4",
+   "version": "4.0.5",
    "dependencies": {
       "haxe-concurrent": "",
       "haxe-strings": ""

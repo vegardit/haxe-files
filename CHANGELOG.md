@@ -8,8 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [4.0.5] - 2025-10-19
+
 ### Fixed
 - Path.getAbsolutePath() returns path with forward-slahses on Windows
+- Path.getModificationTime() not working on Lua because of bug in Haxe standard library
+- File.touch not working reliable on Windows
+- JavaFileWatcher does not emit FILE_DELETED for standalone file deletions
+
 
 ## [4.0.4] - 2025-06-07
 
