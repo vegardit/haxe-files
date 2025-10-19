@@ -110,6 +110,27 @@ class TestRunner extends DocTestRunner {
 
 
    #if filesystem_support
+   public function testFile_Touch():Void {
+      Dir.of("target").create();
+      final file = File.of("target/touch_mtime_test.txt");
+
+      file.delete();
+      assertFalse(file.path.exists());
+
+      file.touch();
+      assertTrue(file.path.exists());
+      assertEquals(file.size(), 0);
+      final t1 = file.path.getModificationTime();
+
+      Sys.sleep(1.6); // ensure crossing 1-second mtime granularity on some targets
+
+      file.touch();
+      final t2 = file.path.getModificationTime();
+      file.delete();
+
+      assertTrue(t2 > t1);
+   }
+
    public function testPollingFileWatcher_SingleFile():Void {
       var ex = Executor.create();
       var fw = new PollingFileWatcher(ex, 200);
